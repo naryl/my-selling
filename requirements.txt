@@ -1,0 +1,4 @@
+Pillow~=6.2.2
+chevron~=0.13.1
+xhtml2pdf~=0.2.4
+reportlab~=3.5.34

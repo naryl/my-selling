@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Расписка о приёмке техники в ремонт № {{receipt_number}}</title>
+
+    <style>
+
+            {{#fonts}}
+            @font-face {
+                font-family: {{family}};
+                src: url("{{font}}");
+            }
+            {{/fonts}}
+
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 10px;
+            font-size: 16px;
+            line-height: 12px;
+            font-family: serif;
+            color: #000;
+        }
+
+        .invoice-box table {
+            width: 100%;
+            table-layout: fixed;
+            line-height: inherit;
+            text-align: left;
+        }
+
+        .invoice-box table td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        .invoice-box table tr.text td {
+            font-size: 14px;
+            padding: 2px;
+        }
+
+        .invoice-box table tr td.contacts {
+            text-align: right;
+        }
+
+        .invoice-box table tr.top table td {
+            padding-bottom: 10px;
+        }
+
+        .invoice-box table tr.top table td.company {
+            text-align: right;
+            font-size: 18px;
+            font-family: cursive, sans-serif;
+            line-height: 12px;
+            color: #333;
+        }
+
+        .invoice-box table tr.title td {
+            text-align: center;
+            font-size: 18px;
+            font-family: sans-serif;
+            line-height: 12px;
+            width: 100%;
+            color: #333;
+            padding-bottom: 10px;
+        }
+
+        .invoice-box table tr.heading td {
+            text-align: center;
+            background: #eee;
+            border-bottom: 1px solid #ddd;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            font-weight: bold;
+        }
+
+        .invoice-box table tr.item td {
+            border-bottom: 1px solid #eee;
+            border-left: 1px solid #eee;
+            border-right: 1px solid #eee;
+        }
+
+        .invoice-box table tr.item.last td {
+            padding-bottom: 5px;
+        }
+
+        .invoice-box table tr.text td {
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .invoice-box table tr.phone td {
+            padding-bottom: 10px;
+        }
+
+        .invoice-box table tr.signature td {
+            padding-bottom: 10px;
+        }
+
+        .invoice-box table tr.footer td {
+            padding-top: 10px;
+        }
+
+        .invoice-box table tr.footer td:nth-child(2) {
+            text-align: right;
+        }
+
+        /** Table columns **/
+        .t1 {
+            width: 5%
+        }
+
+        .t2 {
+            width: 27%
+        }
+
+        .t3 {
+            width: 16%
+        }
+
+        .t4 {
+            width: 31%
+        }
+
+        .t5 {
+            width: 21%
+        }
+
+        @media only screen and (max-width: 600px) {
+            .invoice-box table tr.top table td {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="invoice-box">
+    <table>
+        <colgroup>
+            <col class="t1"/>
+            <col class="t2"/>
+            <col class="t3"/>
+            <col class="t4"/>
+            <col class="t5"/>
+        </colgroup>
+        <tr class="top">
+            <td colspan="5">
+                <table>
+                    <tr>
+                        <td class="company">
+                            Expert Systems
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="contacts">
+                            Профессиональная Компьютерная Корпорация<br>
+                            Сайт: http://163it.ru Тел.: 2-722-770<br>
+                            Почта: 163it@163it.ru<br>
+                            +7-846-2722-770 Viber, WhatsApp
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr class="title">
+            <td colspan="5">
+                Расписка о приёмке техники в ремонт № {{receipt_number}}
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="5">
+                Получена в ремонт указанная в таблице техника:
+            </td>
+        </tr>
+
+        <tr class="heading">
+            <td style="width: 5%">
+                №
+            </td>
+
+            <td style="width: 27%">
+                Марка, модель техники
+            </td>
+
+            <td style="width: 16%">
+                Серийный номер
+            </td>
+
+            <td style="width: 31%">
+                Заявленная неисправность
+            </td>
+
+            <td style="width: 21%">
+                Внешние повреждения (на момент сдачи техники в ремонт)
+            </td>
+        </tr>
+
+        {{#list_items}}
+            <tr class="item{{#last}} last{{/last}}">
+                <td>
+                    {{number}}
+                </td>
+
+                <td>
+                    {{device}}
+                </td>
+
+                <td>
+                    {{serial}}
+                </td>
+
+                <td>
+                    {{declared_defect}}
+                </td>
+
+                <td>
+                    {{existing_damage}}
+                </td>
+            </tr>
+        {{/list_items}}
+
+        <tr class="heading">
+            <td colspan="2">
+                Номер в таблице сданной в ремонт техники, модель
+            </td>
+
+            <td colspan="2">
+                Предварительно, предположительно выявленные дефекты и стоимость работы
+            </td>
+
+            <td>
+                Предполагаемый срок ремонта
+            </td>
+        </tr>
+
+        {{#list_items}}
+            <tr class="item{{#last}} last{{/last}}">
+                <td colspan="2">
+                    {{number}}
+                </td>
+
+                <td colspan="2">
+                    {{alleged_defect}}
+                </td>
+
+                <td>
+                    {{estimated_repair_time}}
+                </td>
+            </tr>
+        {{/list_items}}
+
+        <tr class="text">
+            <td colspan="5">
+                Диагностика в течение {{diag_time}} дней, точный срок ремонта по наличии или после заказа запчастей
+                после диагностики.
+            </td>
+        </tr>
+
+        <tr class="text">
+            <td colspan="5">
+                Внешний осмотр техники осуществляется в присутствии заказчика. Техника с согласия потребителя
+                принимается без разборки и проверки неисправностей, без проверки внутренних повреждений. Заказчик
+                согласен, что все неисправности и внутренние повреждения, которые могут быть обнаружены в оборудовании
+                при техническом обслуживании, возникли до приёма оборудования в сервисный центр. Заказчик соглашается,
+                что техника принимается для проведения диагностики на срок, указанный в данной расписке, и возможного
+                последующего ремонта.
+            </td>
+        </tr>
+
+        <tr class="text">
+            <td colspan="5">
+                В случае неявки Заказчика для получения результата выполненных работ или иного уклонения Заказчика от
+                приёмки сданной в ремонт техники, Исполнитель не несёт никакой ответственности за технику, в отношении
+                которой потребителем утерян интерес, и имеет право по истечении 30 дней утилизировать данную технику
+                либо реализовать её по остаточной стоимости для покрытия расходов на её хранение.
+            </td>
+        </tr>
+
+        <tr class="text">
+            <td colspan="5">
+                Все ремонтные работы проводятся только в отношении заявленных потребителем и зафиксированных в квитанции
+                неисправностей.
+            </td>
+        </tr>
+
+        <tr class="text">
+            <td colspan="5">
+                Претензии по стоимости и качеству выполненной работы предъявляются только при наличии оформленного
+                надлежащим образом акта выполненных работ.
+            </td>
+        </tr>
+
+        <tr class="text">
+            <td colspan="5">
+                Исполнитель не несёт ответственность за сохранность информации на различных носителях информации.
+            </td>
+        </tr>
+
+        <tr class="text">
+            <td colspan="5">
+                В случае, когда результат диагностики не подтвердит заявленную заказчиком неисправность, заказчик
+                согласен оплатить диагностические работы в соответствии с действующим прайс-листом Исполнителя. До
+                момента оплаты диагностических работ техника заказчика считается находящейся в залоге у Исполнителя.
+            </td>
+        </tr>
+
+        <tr class="text">
+            <td colspan="5"></td>
+        </tr>
+
+        <tr class="phone">
+            <td colspan="5">
+                Телефон: {{phone_main}}{{#phone_additional}} <br>
+                Доп. телефон: {{phone_additional}} {{/phone_additional}}
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="5">
+                С предварительным дефектом,<br>
+                стоимостью работ,<br>
+                сроком ремонта ознакомлен.
+            </td>
+        </tr>
+
+        <tr class="signature">
+            <td colspan="2">
+                Подпись Заказчика:
+            </td>
+
+            <td>
+                _________________________
+            </td>
+
+            <td colspan="2"></td>
+        </tr>
+
+        <tr class="signature">
+            <td colspan="2">
+                Имя, Подпись Приёмщика:
+            </td>
+
+            <td>
+                _________________________
+            </td>
+
+            <td colspan="2"></td>
+        </tr>
+
+        <tr class="footer">
+            <td colspan="2">
+                М.П.
+            </td>
+
+            <td colspan="3">
+                Дата, Время приёмки: {{date_time}}
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
