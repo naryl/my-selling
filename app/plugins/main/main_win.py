@@ -24,10 +24,15 @@ import os
 import time
 import tkMessageBox as box
 from Tkinter import *
+import tkFileDialog
 
 from MultiListbox import MultiListbox
 from edit_log import Log
 from ttk import *
+
+from number_to_string import get_string_by_number
+from xlsxtpl.writerx import BookWriter
+from date_time import date_now, date_get, time_now, norm_date
 
 
 def date_now():
@@ -111,13 +116,19 @@ class Main:
         self.sum_ent.bind("<Return>", return_handler)
         self.sum_var.trace('w', self.update_total)
 
+        # act of completion
+        self.act_print_var = IntVar()
+        self.act_print_chk = Checkbutton(self.add_f, variable=self.act_print_var, onvalue=1, offvalue=0)
+        self.act_print_chk.pack(side='right')
+        Label(self.add_f, text='Акт вып раб').pack(side='right', padx=2, pady=2)
+
         self.dep_name = Text(self.add_f, height=2, font=(15))
         self.dep_name.pack(side='left', padx=10, fill=BOTH, pady=5)
         self.dep_name.bind("<Tab>", self.focus_next_widget)
         self.dep_name.bind("<Return>", return_handler)
 
         # Меняем порядок перехода при нажатии <Tab>
-        new_order = (self.otd, self.cat_but, self.dep_name, self.sum_ent, self.rate_v, self.add_but, self.clear_but)
+        new_order = (self.otd, self.cat_but, self.dep_name, self.act_print_chk, self.sum_ent, self.rate_v, self.add_but, self.clear_but)
         for widget in new_order:
             widget.lift()
 
@@ -196,6 +207,9 @@ class Main:
         self.rate_v.set('1')
         self.cat_id = -1
 
+        # clear act print checkbutton
+        self.act_print_var.set(False)
+
     def add_handler(self):
         """ Добавление продажи """
         try:
@@ -205,6 +219,7 @@ class Main:
 
         try:
             sum = float(self.sum_ent.get().replace(',', '.'))
+            total = float(self.total_ent.get().replace(',', '.'))
         except:
             box.showerror(title='Ошибка', message='Не верная сумма!')
             return
@@ -241,6 +256,24 @@ class Main:
         self.app.db.execute('insert into income values (?,?,?,?,?,?,?,?,0)',
                             (dt, tm, int(self.cur_dep) + 1, txt, self.cat_id, sum, rate, self.app.user.decode('utf-8')))
 
+        # forming payload for act print
+        act_print = self.act_print_var.get()
+        if act_print == 1:
+            act_info = {
+                    'act_number': 0,
+                    'act_date': dt,
+                    'p_num': 1,
+                    'service_name': txt,
+                    'garanty': u'3 года',
+                    'q': rate,
+                    'price': sum,
+                    'amount': total,
+                    'total': total,
+                    'total_as_text': get_string_by_number(total),
+                    }
+
+            act_payloads = [act_info]
+
         if self.cat_id <> -1:
             self.app.db.execute('select rate from article where id=?', (self.cat_id,))
             rate = self.app.db.fetchall()[0][0] - rate
@@ -257,7 +290,46 @@ class Main:
         self.build_tree()
         self.update_tools()
 
+        if act_print == 1:
+            self.generate_act(act_payloads, 'app/templates/act_tpl.xlsx', dt, tm, self.cat_id)
+
         self.init_add_plugins(dt, tm)
+
+    def generate_act(self, payloads, xlsx_tpl, _date, _time, art_id):
+        """
+        Generate and save act of completion to xlsx file
+        from given xlsx template
+        param: payloads List of Dict
+        param: xlsx_tpl String path to template file
+        """
+        try:
+            path = self.app.sets.save_pdf
+        except AttributeError:
+            path = ''
+
+        self.app.db.execute('select id from acts where date=?', (_date,))
+        num = len(self.app.db.fetchall()) + 1
+        payloads[0]['act_number'] = num
+
+        filename = 'act_n%s_%s.xlsx' % (num, _date)
+        f = tkFileDialog.asksaveasfilename(initialdir=path, initialfile=filename, master=self.add_f)
+        if not f:
+            return
+        f = f.replace('\\', '/')
+        self.app.sets.save_pdf = '/'.join(f.split('/')[:-1])
+
+        self.app.db.execute('insert into acts (date,time,art_id,num,file)'
+                                'values (?,?,?,?,?)',
+                                (_date, _time, art_id, num, f))
+        self.app.con.commit()
+
+        writer = BookWriter(xlsx_tpl)
+        writer.jinja_env.globals.update(dir=dir, getattr=getattr)
+
+        writer.render_book(payloads=payloads)
+        writer.save(f)
+
+
 
     def build_tree(self):
         """ Рекурсивное построение дерева товаров """

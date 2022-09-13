@@ -196,4 +196,12 @@ CREATE TABLE receipt_item
     sale_price      NUMBER,
     warranty_period NUMBER
 );
+CREATE TABLE acts (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    date            NUMBER,
+    time            NUMBER,
+    art_id          NUMBER,
+    num             NUMBER,
+    file            TEXT
+);
 COMMIT;

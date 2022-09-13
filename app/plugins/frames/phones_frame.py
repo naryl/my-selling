@@ -331,6 +331,11 @@ class Plugin:
                                   command=self.create_receipt)
         self.receipt_but.grid(row=0, column=7, padx=2, pady=2, sticky=E)
 
+        # act of completion
+        # self.act_button = Button(self.edit_frame, text='Акт вып раб', image=self.app.app.img['csv'], compound='left',
+                                 # command=self.generate_csv)
+        # self.act_button.grid(row=0, column=6, columnspan=2, padx=5, sticky=W)
+
         c = self.current_records[int(self.lst.curselection()[0])]
         self.phone_ent.delete(0, END)
         self.phone_ent.insert(0, c[self.idx_phone])

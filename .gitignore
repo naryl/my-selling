@@ -5,6 +5,9 @@
 # JetBrains IDE: PyCharm
 .idea
 
+# Sqlite DB
+*.db
+
 # custom
 .cache
 #*.css
