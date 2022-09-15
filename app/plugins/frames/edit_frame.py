@@ -28,6 +28,8 @@ from MultiListbox import MultiListbox
 from calend import TkCalendar
 from date_time import date_now, norm_date
 from edit_log import Log
+from number_to_string import get_string_by_number
+from act_tovar import Act
 
 name = 'Редактировать'
 frame = 0
@@ -44,7 +46,7 @@ class Plugin:
         self.win = Toplevel(self.app.app.win)
         self.win.title(name)
         self.win.protocol("WM_DELETE_WINDOW", self.exit)
-        x, y = 800, 450
+        x, y = 950, 450
         pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))
         self.win.maxsize(width=x, height=y)
@@ -174,9 +176,20 @@ class Plugin:
         self.sum_ent = Entry(self.edit_frame, width=7, cursor='xterm', font=('normal', 12))
         self.sum_ent.grid(row=0, column=7, padx=2, pady=2)
 
+        self.act_tovar_f = Frame(self.edit_frame)
+        self.act_tovar_f.grid(row=1, column=3)
+        self.save_but = Button(self.act_tovar_f, text='Акт вып раб', image=self.app.app.img['csv'], compound='left',
+                               command=self.print_act)
+        self.save_but.grid(row=0, column=0, padx=2, pady=2)
+
+        self.save_but = Button(self.act_tovar_f, text='Товар чек', image=self.app.app.img['csv'], compound='left',
+                               command=self.print_tovar)
+        self.save_but.grid(row=0, column=1, padx=2, pady=2)
+
         self.save_but = Button(self.edit_frame, text='Сохранить', image=self.app.app.img['save'], compound='left',
                                command=self.save_income)
         self.save_but.grid(row=1, column=6, columnspan=2, pady=2)
+
         if not self.lst.curselection(): return
         c = self.current_income[int(self.lst.curselection()[0])]
         self.otd_ent.delete(0, END)
@@ -262,7 +275,7 @@ class Plugin:
         self.update_lists()
         self.log.del_outcome(c[5], c[0], c[1], c[2], c[3], self.app.app.user.decode('utf-8'), text)
 
-    def save_income(self):
+    def save_income(self, act_print=0, tovar_print=0):
         """ сохранение отредактированной продажи """
         if not self.lst.curselection(): return
         dep = self.otd_ent.get()
@@ -300,6 +313,42 @@ class Plugin:
         self.lst.selection_set(i)
         self.log.edit_income(c[7], c[0], [c[1], c[2], c[4], c[3]], [dep, art, kvo, summa],
                              self.app.app.user.decode('utf-8'), c[5])
+
+        # forming payload for act print
+        total = round(float(kvo) * float(summa), 2)
+        if act_print == 1 or tovar_print == 1:
+            act_info = {
+                    'act_number': 0,
+                    'act_date': c[7],
+                    'p_num': 1,
+                    'service_name': art,
+                    'garanty': u'3 года',
+                    'q': kvo,
+                    'price': summa,
+                    'amount': total,
+                    'total': total,
+                    'total_as_text': get_string_by_number(total),
+                    }
+
+            act_payloads = [act_info]
+
+            art_id = -1
+            self.app.app.db.execute('select id from article where name=?', (art,))
+            if len(self.app.app.db.fetchall()) > 0:
+                art_id = self.app.app.db.fetchall()[0][0]
+            self.act = Act(self.app.app)
+
+        if act_print == 1:
+            self.act.generate_act(act_payloads, 'app/templates/act_tpl.xlsx', c[7], c[0], art_id, 'act', self.edit_frame)
+
+        if tovar_print == 1:
+            self.act.generate_act(act_payloads, 'app/templates/tovar_tpl.xlsx', c[7], c[0], art_id, 'tovar', self.edit_frame)
+
+    def print_act(self):
+        payloads = self.save_income(1,0)
+
+    def print_tovar(self):
+        payloads = self.save_income(0,1)
 
     def save_outcome(self):
         """ сохранение отредактированного расхода """
