@@ -268,6 +268,7 @@ class Main:
         act_print = self.act_print_var.get()
         tovar_print = self.tovar_print_var.get()
         if act_print == 1 or tovar_print == 1:
+            art_id = -1
             act_info = {
                     'act_number': 0,
                     'act_date': dt,

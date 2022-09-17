@@ -46,7 +46,7 @@ class Plugin:
         self.win = Toplevel(self.app.app.win)
         self.win.title(name)
         self.win.protocol("WM_DELETE_WINDOW", self.exit)
-        x, y = 950, 450
+        x, y = 850, 450
         pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))
         self.win.maxsize(width=x, height=y)
