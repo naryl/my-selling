@@ -579,7 +579,7 @@ class Updates():
                 if zipfile.is_zipfile('app/updates/' + f):
                     self.txt.insert(END, 'Успешно сохранено...\n')
                 else:
-                    self.txt.insert(END, 'Ошибка при загрузки обновления!\n')
+                    self.txt.insert(END, 'Ошибка при загрузке обновления!\n')
                     os.remove('app/updates/' + f)
                     self.down_but['state'] = 'normal'
                     return
@@ -609,7 +609,7 @@ class Options:
         self.cashbox_var = StringVar()
         self.cashbox_var.set(str(self.app.app.app.sets.cashbox))
         Label(self.win, text='Касса').grid(row=2, column=0, padx=5)
-        self.cashbox_ent = Entry(self.win, width=16, font=('normal', 14),
+        self.cashbox_ent = Entry(self.win, width=14, font=('normal', 14),
                                  cursor='xterm', textvariable=self.cashbox_var)
         self.cashbox_ent.grid(row=2, column=1, padx=5)
 
@@ -623,49 +623,49 @@ class Options:
         self.col_width_phone_var = StringVar()
         self.col_width_phone_var.set(str(self.app.app.app.sets.col_width_phone))
         Label(self.col_width_frame, text='Телефон').grid(row=0, column=0, padx=5)
-        self.col_width_phone_ent = Entry(self.col_width_frame, width=15, cursor='xterm',
+        self.col_width_phone_ent = Entry(self.col_width_frame, width=10, cursor='xterm',
                                          textvariable=self.col_width_phone_var)
         self.col_width_phone_ent.grid(row=0, column=1)
 
         self.col_width_name_var = StringVar()
         self.col_width_name_var.set(str(self.app.app.app.sets.col_width_name))
         Label(self.col_width_frame, text='Имя').grid(row=1, column=0, padx=5)
-        self.col_width_name_ent = Entry(self.col_width_frame, width=15, cursor='xterm',
+        self.col_width_name_ent = Entry(self.col_width_frame, width=10, cursor='xterm',
                                         textvariable=self.col_width_name_var)
         self.col_width_name_ent.grid(row=1, column=1)
 
         self.col_width_details_var = StringVar()
         self.col_width_details_var.set(str(self.app.app.app.sets.col_width_details))
         Label(self.col_width_frame, text='Детали').grid(row=2, column=0, padx=5)
-        self.col_width_details_ent = Entry(self.col_width_frame, width=15, cursor='xterm',
+        self.col_width_details_ent = Entry(self.col_width_frame, width=10, cursor='xterm',
                                            textvariable=self.col_width_details_var)
         self.col_width_details_ent.grid(row=2, column=1)
 
         self.col_width_date_var = StringVar()
         self.col_width_date_var.set(str(self.app.app.app.sets.col_width_date))
         Label(self.col_width_frame, text='Дата').grid(row=3, column=0, padx=5)
-        self.col_width_date_ent = Entry(self.col_width_frame, width=15, cursor='xterm',
+        self.col_width_date_ent = Entry(self.col_width_frame, width=10, cursor='xterm',
                                         textvariable=self.col_width_date_var)
         self.col_width_date_ent.grid(row=3, column=1)
 
         self.col_width_time_var = StringVar()
         self.col_width_time_var.set(str(self.app.app.app.sets.col_width_time))
         Label(self.col_width_frame, text='Время').grid(row=4, column=0, padx=5)
-        self.col_width_time_ent = Entry(self.col_width_frame, width=15, cursor='xterm',
+        self.col_width_time_ent = Entry(self.col_width_frame, width=10, cursor='xterm',
                                         textvariable=self.col_width_time_var)
         self.col_width_time_ent.grid(row=4, column=1)
 
         self.col_width_done_date_var = StringVar()
         self.col_width_done_date_var.set(str(self.app.app.app.sets.col_width_done_date))
         Label(self.col_width_frame, text='Дата исп.').grid(row=5, column=0, padx=5)
-        self.col_width_done_date_ent = Entry(self.col_width_frame, width=15, cursor='xterm',
+        self.col_width_done_date_ent = Entry(self.col_width_frame, width=10, cursor='xterm',
                                              textvariable=self.col_width_done_date_var)
         self.col_width_done_date_ent.grid(row=5, column=1)
 
         self.col_width_done_time_var = StringVar()
         self.col_width_done_time_var.set(str(self.app.app.app.sets.col_width_done_time))
         Label(self.col_width_frame, text='Время исп.').grid(row=6, column=0, padx=5)
-        self.col_width_done_time_ent = Entry(self.col_width_frame, width=15, cursor='xterm',
+        self.col_width_done_time_ent = Entry(self.col_width_frame, width=10, cursor='xterm',
                                              textvariable=self.col_width_done_time_var)
         self.col_width_done_time_ent.grid(row=6, column=1)
 
@@ -679,56 +679,90 @@ class Options:
         self.col_width_main_time_var = StringVar()
         self.col_width_main_time_var.set(str(self.app.app.app.sets.col_width_main_time))
         Label(self.col_width_main_frame, text='Время').grid(row=0, column=0, padx=5)
-        self.col_width_main_time_ent = Entry(self.col_width_main_frame, width=15, cursor='xterm',
+        self.col_width_main_time_ent = Entry(self.col_width_main_frame, width=10, cursor='xterm',
                                          textvariable=self.col_width_main_time_var)
         self.col_width_main_time_ent.grid(row=0, column=1)
 
         self.col_width_main_dep_var = StringVar()
         self.col_width_main_dep_var.set(str(self.app.app.app.sets.col_width_main_dep))
         Label(self.col_width_main_frame, text='Отдел').grid(row=2, column=0, padx=5)
-        self.col_width_main_dep_ent = Entry(self.col_width_main_frame, width=15, cursor='xterm',
+        self.col_width_main_dep_ent = Entry(self.col_width_main_frame, width=10, cursor='xterm',
                                            textvariable=self.col_width_main_dep_var)
-        self.col_width_main_dep_ent.grid(row=2, column=1)
+        self.col_width_main_dep_ent.grid(row=1, column=1)
 
         self.col_width_main_art_var = StringVar()
         self.col_width_main_art_var.set(str(self.app.app.app.sets.col_width_main_art))
         Label(self.col_width_main_frame, text='Товар').grid(row=3, column=0, padx=5)
-        self.col_width_main_art_ent = Entry(self.col_width_main_frame, width=15, cursor='xterm',
+        self.col_width_main_art_ent = Entry(self.col_width_main_frame, width=10, cursor='xterm',
                                         textvariable=self.col_width_main_art_var)
-        self.col_width_main_art_ent.grid(row=3, column=1)
+        self.col_width_main_art_ent.grid(row=2, column=1)
 
         self.col_width_main_sum_var = StringVar()
         self.col_width_main_sum_var.set(str(self.app.app.app.sets.col_width_main_sum))
         Label(self.col_width_main_frame, text='Сумма').grid(row=4, column=0, padx=5)
-        self.col_width_main_sum_ent = Entry(self.col_width_main_frame, width=15, cursor='xterm',
+        self.col_width_main_sum_ent = Entry(self.col_width_main_frame, width=10, cursor='xterm',
                                         textvariable=self.col_width_main_sum_var)
-        self.col_width_main_sum_ent.grid(row=4, column=1)
+        self.col_width_main_sum_ent.grid(row=3, column=1)
 
         self.col_width_main_rate_var = StringVar()
         self.col_width_main_rate_var.set(str(self.app.app.app.sets.col_width_main_rate))
         Label(self.col_width_main_frame, text='Кол.во').grid(row=5, column=0, padx=5)
-        self.col_width_main_rate_ent = Entry(self.col_width_main_frame, width=15, cursor='xterm',
+        self.col_width_main_rate_ent = Entry(self.col_width_main_frame, width=10, cursor='xterm',
                                              textvariable=self.col_width_main_rate_var)
-        self.col_width_main_rate_ent.grid(row=5, column=1)
+        self.col_width_main_rate_ent.grid(row=4, column=1)
 
         self.col_width_main_total_var = StringVar()
         self.col_width_main_total_var.set(str(self.app.app.app.sets.col_width_main_total))
         Label(self.col_width_main_frame, text='Итог').grid(row=6, column=0, padx=5)
-        self.col_width_main_total_ent = Entry(self.col_width_main_frame, width=15, cursor='xterm',
+        self.col_width_main_total_ent = Entry(self.col_width_main_frame, width=10, cursor='xterm',
                                              textvariable=self.col_width_main_total_var)
-        self.col_width_main_total_ent.grid(row=6, column=1)
+        self.col_width_main_total_ent.grid(row=5, column=1)
 
         self.col_width_main_user_var = StringVar()
         self.col_width_main_user_var.set(str(self.app.app.app.sets.col_width_main_user))
         Label(self.col_width_main_frame, text='Продавец').grid(row=7, column=0, padx=5)
-        self.col_width_main_user_ent = Entry(self.col_width_main_frame, width=15, cursor='xterm',
+        self.col_width_main_user_ent = Entry(self.col_width_main_frame, width=10, cursor='xterm',
                                              textvariable=self.col_width_main_user_var)
-        self.col_width_main_user_ent.grid(row=7, column=1)
+        self.col_width_main_user_ent.grid(row=6, column=1)
 
         self.save_col_width_main_but = Button(self.col_width_main_frame, text='Сохранить', image=self.app.app.app.img['save'],
                                               compound='left', command=self.save_col_width_main)
-        self.save_col_width_main_but.grid(row=8, column=0)
+        self.save_col_width_main_but.grid(row=7, column=0)
 
+        self.act_frame = LabelFrame(self.win, text='Настройки Акт/Чек', width=300, height=250)
+        self.act_frame.grid(padx=5, row=3, column=4, columnspan=2, rowspan=5, sticky=N)
+
+        self.act_but_text_var = StringVar()
+        self.act_but_text_var.set(str(getattr(self.app.app.app.sets, 'act_but_text', 'Act').encode('utf-8')))
+        Label(self.act_frame, text='Кнопка Акт').grid(row=0, column=0, padx=5)
+        self.act_but_text_ent = Entry(self.act_frame, width=10, cursor='xterm',
+                                         textvariable=self.act_but_text_var)
+        self.act_but_text_ent.grid(row=0, column=1)
+
+        self.tovar_but_text_var = StringVar()
+        self.tovar_but_text_var.set(str(getattr(self.app.app.app.sets, 'tovar_but_text', 'Check').encode('utf-8')))
+        Label(self.act_frame, text='Кнопка Чек').grid(row=1, column=0, padx=5)
+        self.tovar_but_text_ent = Entry(self.act_frame, width=10, cursor='xterm',
+                                           textvariable=self.tovar_but_text_var)
+        self.tovar_but_text_ent.grid(row=1, column=1)
+
+        self.allow_actfile_save_var = IntVar()
+        self.allow_actfile_save_var.set(getattr(self.app.app.app.sets, 'allow_actfile_save', True))
+        self.allow_actfile_save_chk = Checkbutton(self.act_frame, text='Диалог сохранения файла',
+                                               variable=self.allow_actfile_save_var,
+                                               command=self.toggle_allow_actfile_save)
+        self.allow_actfile_save_chk.grid(row=2, column=0, columnspan=2, pady=5)
+
+        self.allow_tmpfile_del_var = IntVar()
+        self.allow_tmpfile_del_var.set(getattr(self.app.app.app.sets, 'allow_tmpfile_del', False))
+        self.allow_tmpfile_del_chk = Checkbutton(self.act_frame, text='Удалять файлы акт/чеков\nкак временные',
+                                               variable=self.allow_tmpfile_del_var,
+                                               command=self.toggle_allow_tmpfile_del)
+        self.allow_tmpfile_del_chk.grid(row=3, column=0, columnspan=2, pady=5)
+
+        self.save_act_sett_but = Button(self.act_frame, text='Сохранить', image=self.app.app.app.img['save'],
+                                              compound='left', command=self.save_act_tovar)
+        self.save_act_sett_but.grid(row=7, column=0)
 
     def toggle_allow_del_phone(self):
         self.app.app.app.sets.allow_del_phone = self.allow_del_phone_var.get()
@@ -768,3 +802,20 @@ class Options:
         except:
             box.showerror(title='Ошибка', message='Неверное значение!')
             return
+
+    def save_act_tovar(self):
+        try:
+            self.app.app.app.sets.act_but_text = self.act_but_text_ent.get()
+            self.app.app.app.sets.tovar_but_text = self.tovar_but_text_ent.get()
+        except:
+            box.showerror(title='Ошибка', message='Неверное значение!')
+            return
+
+    def toggle_allow_actfile_save(self):
+        self.app.app.app.sets.allow_actfile_save = self.allow_actfile_save_var.get()
+        setattr(self.app.app.app.sets, 'allow_actfile_save', self.allow_actfile_save_var.get())
+
+    def toggle_allow_tmpfile_del(self):
+        self.app.app.app.sets.allow_tmpfile_del = self.allow_tmpfile_del_var.get()
+        setattr(self.app.app.app.sets, 'allow_tmpfile_del', self.allow_tmpfile_del_var.get())
+

@@ -119,14 +119,18 @@ class Main:
         self.act_tovar_f.pack(fill=X, side='right')
 
         self.act_print_var = IntVar()
-        self.act_print_chk = Checkbutton(self.act_tovar_f, variable=self.act_print_var, onvalue=1, offvalue=0)
-        self.act_print_chk.grid(row=0, column=1, padx=2, pady=2, sticky=NW) # .pack(side='right')
-        Label(self.act_tovar_f, text='Акт вып раб').grid(row=0, column=0, padx=2, pady=2, sticky=NW) # .pack(side='right', padx=2, pady=2)
+        act_but_text_var = str(getattr(self.app.sets, 'act_but_text', 'Act').encode('utf-8'))
+        self.act_print_chk = Checkbutton(self.act_tovar_f, variable=self.act_print_var, onvalue=1, offvalue=0, 
+                command=self.clear_tovar_print_chk)
+        self.act_print_chk.grid(row=0, column=1, padx=2, pady=2, sticky=NW)
+        Label(self.act_tovar_f, text=act_but_text_var).grid(row=0, column=0, padx=2, pady=2, sticky=NW)
 
         self.tovar_print_var = IntVar()
-        self.tovar_print_chk = Checkbutton(self.act_tovar_f, variable=self.tovar_print_var, onvalue=1, offvalue=0)
-        self.tovar_print_chk.grid(row=1, column=1, padx=2, pady=2, sticky=NW) # .pack(side='right')
-        Label(self.act_tovar_f, text='Товар чек').grid(row=1, column=0, padx=2, pady=2, sticky=NW) # .pack(side='right', padx=2, pady=2)
+        tovar_but_text_var = str(getattr(self.app.sets, 'tovar_but_text', 'Check').encode('utf-8'))
+        self.tovar_print_chk = Checkbutton(self.act_tovar_f, variable=self.tovar_print_var, onvalue=1, offvalue=0, 
+                command=self.clear_act_print_chk)
+        self.tovar_print_chk.grid(row=1, column=1, padx=2, pady=2, sticky=NW)
+        Label(self.act_tovar_f, text=tovar_but_text_var).grid(row=1, column=0, padx=2, pady=2, sticky=NW)
 
         self.dep_name = Text(self.add_f, height=2, font=(15))
         self.dep_name.pack(side='left', padx=10, fill=BOTH, pady=5)
@@ -217,6 +221,15 @@ class Main:
         # clear act print checkbutton
         self.act_print_var.set(False)
         self.tovar_print_var.set(False)
+
+
+    def clear_act_print_chk(self):
+        self.act_print_var.set(False)
+
+
+    def clear_tovar_print_chk(self):
+        self.tovar_print_var.set(False)
+
 
     def add_handler(self):
         """ Добавление продажи """

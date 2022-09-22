@@ -178,11 +178,15 @@ class Plugin:
 
         self.act_tovar_f = Frame(self.edit_frame)
         self.act_tovar_f.grid(row=1, column=3)
-        self.save_but = Button(self.act_tovar_f, text='Акт вып раб', image=self.app.app.img['csv'], compound='left',
+
+        act_but_text_var = str(getattr(self.app.app.sets, 'act_but_text', 'Act').encode('utf-8'))
+        tovar_but_text_var = str(getattr(self.app.app.sets, 'tovar_but_text', 'Check').encode('utf-8'))
+
+        self.save_but = Button(self.act_tovar_f, text=act_but_text_var, image=self.app.app.img['csv'], compound='left',
                                command=self.print_act)
         self.save_but.grid(row=0, column=0, padx=2, pady=2)
 
-        self.save_but = Button(self.act_tovar_f, text='Товар чек', image=self.app.app.img['csv'], compound='left',
+        self.save_but = Button(self.act_tovar_f, text=tovar_but_text_var, image=self.app.app.img['csv'], compound='left',
                                command=self.print_tovar)
         self.save_but.grid(row=0, column=1, padx=2, pady=2)
 
