@@ -20,11 +20,14 @@
 
 """
 import os
-import tkMessageBox as box
-from Tkinter import *
-from ttk import *
+import sys
+import tkinter.messagebox as box
+from tkinter import *
 
-from date_time import date_now, time_now
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+from app.plugins.ext_lib.date_time import date_now, time_now
 
 name = 'Добавить расход'
 frame = 0
@@ -40,7 +43,7 @@ class Plugin:
         self.win = Toplevel(self.app.app.win)
         self.win.title(name)
         x, y = 600, 110
-        pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
+        pos = self.win.wm_maxsize()[0] // 2 - x // 2, self.win.wm_maxsize()[1] // 2 - y // 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1]))
         self.win.maxsize(width=x, height=y)
         self.win.minsize(width=x, height=y)
@@ -85,7 +88,7 @@ class Plugin:
             return
         dt, tm = date_now(), time_now()
         self.app.app.db.execute('insert into outcome values (?,?,?,?,?,?,0)',
-                                (dt, tm, text, -1, s, self.app.app.user.decode('utf-8')))
+                                (dt, tm, text, -1, s, self.app.app.user.encode('utf-8')))
         self.app.app.con.commit()
         self.win.destroy()
 
@@ -98,6 +101,8 @@ class Plugin:
 
     def init_add_plugins(self, dt, tm):
         """ Плагины при добавлении расхода """
+        # TODO: Заменить словариком плагинов (Пока их всё равно нет)
+        return
         s = os.listdir('app/plugins/outcome')
         for x in s:
             if x.endswith('.py'):

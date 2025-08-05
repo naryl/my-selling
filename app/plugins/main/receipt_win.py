@@ -19,17 +19,20 @@
 
 
 """
-import cStringIO
+import sys
+
+from io import StringIO
 import os
 import subprocess
 import tempfile
-from Tkinter import *
+from tkinter import *
 
 import chevron
 import xhtml2pdf.pisa as pisa
 
-from edit_log import Log
-from ttk import *
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.main.edit_log import Log
+from app.plugins.ext_lib.ttk import *
 
 
 # TODO remove as unused
@@ -43,6 +46,7 @@ class Main:
         self.log = Log(self.app.app)
 
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.title('Расписка')
         self.win.protocol("WM_DELETE_WINDOW", self.exit)
         x, y = 1600, 400
@@ -194,7 +198,7 @@ class Main:
         # if pdf.warn:
         #    print "*** %d WARNINGS OCCURRED" % pdf.warn
         if pdf.err:
-            print "*** %d ERRORS OCCURRED" % pdf.err
+            print("*** %d ERRORS OCCURRED" % pdf.err)
 
     def set_initial_values(self, values):
         self.initial_values = values
@@ -259,8 +263,8 @@ class Main:
         pdf_file, pdf_file_path = tempfile.mkstemp(suffix='.pdf')
 
         pdf = pisa.CreatePDF(
-            cStringIO.StringIO(html_data),
-            file(pdf_file_path, 'wb'),
+            StringIO(html_data),
+            pdf_file_path,
             encoding='utf-8'
         )
 

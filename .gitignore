@@ -129,3 +129,7 @@ Session.vim
 # ENV
 .env
 
+.idea
+.venv
+build
+dist

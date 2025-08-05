@@ -2,14 +2,12 @@
 # вспомогательный класс для актов и товарных чеков
 
 import os
-import tkFileDialog
+import tkinter.filedialog as tkFileDialog
 
-from number_to_string import get_string_by_number
 from xlsxtpl.writerx import BookWriter
-from date_time import date_now, date_get, time_now, norm_date
 import subprocess, platform
 from glob import glob
-import tkMessageBox as box
+import tkinter.messagebox as box
 
 
 class Act:
@@ -60,6 +58,13 @@ class Act:
         """
         try:
             path = self.sets.save_pdf
+            if not os.path.exists(path) or not os.path.isdir(path):
+                box.showerror("Мои Продажи", f"Не могу сохранить Акт в папку {path}. Пожалуйста, выберите другую.")
+                path = tkFileDialog.askdirectory(mustexist=False, title="Укажите папку для сохранения Актов")
+                if not os.path.isdir(path):
+                    os.makedirs(path, exist_ok=True)
+                self.sets.save_pdf = path
+
             allow_actfile_save = int(self.sets.allow_actfile_save)
             allow_tmpfile_del = int(self.sets.allow_tmpfile_del)
         except AttributeError:
@@ -87,7 +92,6 @@ class Act:
         if not f:
             return
         f = f.replace('\\', '/')
-        self.sets.save_pdf = '/'.join(f.split('/')[:-1])
 
         self.db.execute('insert into acts (date,time,art_id,num,file)'
                                 'values (?,?,?,?,?)',

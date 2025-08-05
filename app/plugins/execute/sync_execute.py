@@ -21,11 +21,11 @@
 """
 import json
 import sqlite3 as sql
-import thread
 import time
 import urllib
 
-from date_time import date_now, time_now, date2int
+from app.plugins.ext_lib.date_time import date_now, time_now, date2int
+import app.plugins.ext_lib.thread as thread
 
 
 # import socket

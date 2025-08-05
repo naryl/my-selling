@@ -11,10 +11,7 @@ from _csv import Error, __version__, writer, reader, register_dialect, \
     __doc__
 from _csv import Dialect as _Dialect
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+from io import StringIO
 
 __all__ = ["QUOTE_MINIMAL", "QUOTE_ALL", "QUOTE_NONNUMERIC", "QUOTE_NONE",
            "Error", "Dialect", "__doc__", "excel", "excel_tab",
@@ -50,7 +47,7 @@ class Dialect:
     def _validate(self):
         try:
             _Dialect(self)
-        except TypeError, e:
+        except TypeError as e:
             # We do this for compatibility with py2.3
             raise Error(str(e))
 
@@ -132,9 +129,7 @@ class DictWriter:
         self.fieldnames = fieldnames  # list of keys for the dict
         self.restval = restval  # for writing short dicts
         if extrasaction.lower() not in ("raise", "ignore"):
-            raise ValueError, \
-                ("extrasaction (%s) must be 'raise' or 'ignore'" %
-                 extrasaction)
+            raise ValueError("extrasaction (%s) must be 'raise' or 'ignore'" % extrasaction)
         self.extrasaction = extrasaction
         self.writer = writer(f, dialect, *args, **kwds)
 
@@ -185,7 +180,7 @@ class Sniffer:
                                                                 delimiters)
 
         if not delimiter:
-            raise Error, "Could not determine delimiter"
+            raise Error("Could not determine delimiter")
 
         class dialect(Dialect):
             _name = "sniffed"
@@ -398,7 +393,7 @@ class Sniffer:
 
             for col in columnTypes.keys():
 
-                for thisType in [int, long, float, complex]:
+                for thisType in [int, float, complex]:
                     try:
                         thisType(row[col])
                         break
@@ -408,9 +403,6 @@ class Sniffer:
                     # fallback to length of string
                     thisType = len(row[col])
 
-                # treat longs as ints
-                if thisType == long:
-                    thisType = int
 
                 if thisType != columnTypes[col]:
                     if columnTypes[col] is None:  # add new column type

@@ -19,9 +19,11 @@
 
 
 """
-from Tkinter import *
-from ttk import *
-import tkMessageBox as box
+from tkinter import *
+
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+import tkinter.messagebox as box
 
 name = 'Товар'
 frame = 1
@@ -36,6 +38,7 @@ class Plugin:
     def run(self):
 
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.title(name)
         x, y = 620, 450
         pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
@@ -353,7 +356,7 @@ class Plugin:
         self.tools_frame.destroy()
         self.tools_frame = Labelframe(self.win)
         self.tools_frame.grid(row=0, column=2, rowspan=2)
-        if c <> None:
+        if c != None:
             self.tree.see(c)
             self.tree.selection_set(c)
 

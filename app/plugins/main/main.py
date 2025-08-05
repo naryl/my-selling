@@ -19,32 +19,28 @@
 
 
 """
-version = 'Мои продажи 2.0beta'
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+
+version = 'Мои продажи 3.0RC1'
 import glob
 import os
 import sys
 
-sys.path.append('app/plugins/ext_lib')
-sys.path.append('app/plugins/main')
-sys.path.append('app/plugins/frames')
-sys.path.append('app/plugins/income')
-sys.path.append('app/plugins/outcome')
-sys.path.append('app/plugins/execute')
-
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from app.plugins.ext_lib.ttk import *
 from PIL import ImageTk
 import sqlite3 as sql
 
-import login_win
-import main_win
-import settings
-import updates
-import sync_win
-from date_time import date2int
+import app.plugins.main.login_win as login_win
+import app.plugins.main.main_win as main_win
+import app.plugins.main.settings as settings
+import app.plugins.main.sync_win as sync_win
+from app.plugins.ext_lib.date_time import date2int
+
+import app.plugins.execute.sync_execute as sync_execute
 
 
-class App():
+class App:
     def create_images(self):
         """img - словарь содержащий ImageTk изображения.
         Ключи словаря это имена картинок без расширения"""
@@ -67,9 +63,7 @@ class App():
         self.title = '%s - ' + self.version
         root.title(self.title % ('Выбор пользователя'))
         root.minsize(800, 600)
-
-        # включение сочетания клавиш копирования на других раскладках
-        root.bind_all("<Key>", self._onKeyRelease, "+")
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(root)
 
         if sys.platform == 'win32':
             root.state('zoomed')
@@ -96,21 +90,9 @@ class App():
         self.win = Frame(self.root)
         self.win.pack(expand=YES, fill=BOTH)
 
-        # провереряем, есть ли сохраненные апдейты,если есть, апдейтимся
-        upd = os.listdir('app/updates')
-        if len(upd) > 0:
-            s = updates.Main(self)
-        else:
-            self.change_user()
-        # запускаем execute  плагины
-        s = os.listdir('app/plugins/execute')
-        self.t_pl = {}
-        for n, x in enumerate(s):
-            if x.endswith('.py'):
-                obj = __import__(x[:-3])
-                self.t_pl[n] = getattr(obj, 'Plugin')(self)
+        self.change_user()
 
-                pass
+        sync_execute.Plugin(self)
 
     def change_user(self):
         """Смена пользователя"""
@@ -121,21 +103,9 @@ class App():
 
     def set_user(self, usr):
         """Вызывается модулем change_user"""
-        self.user = usr.encode('utf-8')
+        self.user = usr
         self.win.destroy()
         self.win = Frame(self.root)
         self.win.pack(expand=YES, fill=BOTH)
-        self.root.title(self.title % (self.user))
+        self.root.title(self.title % (usr))
         self.add_win = main_win.Main(self)
-
-    @staticmethod
-    def _onKeyRelease(event):
-        ctrl = (event.state & 0x4) != 0
-        if event.keycode == 88 and ctrl and event.keysym.lower() != "x":
-            event.widget.event_generate("<<Cut>>")
-
-        if event.keycode == 86 and ctrl and event.keysym.lower() != "v":
-            event.widget.event_generate("<<Paste>>")
-
-        if event.keycode == 67 and ctrl and event.keysym.lower() != "c":
-            event.widget.event_generate("<<Copy>>")

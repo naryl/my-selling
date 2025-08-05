@@ -19,11 +19,13 @@
 
 
 """
-import tkMessageBox as box
-from Tkinter import *
+import sys
+import tkinter.messagebox as box
+from tkinter import *
 
-from edit_log import Log
-from ttk import *
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.main.edit_log import Log
+from app.plugins.ext_lib.ttk import *
 
 # noinspection PyByteLiteral
 name = 'Блокнот'
@@ -47,11 +49,12 @@ class Plugin:
             return 'break'
 
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.app.notepad_frame = self.win
         self.win.title(name)
         self.win.protocol("WM_DELETE_WINDOW", self.exit)
         x, y = 1000, 800
-        pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
+        pos = self.win.wm_maxsize()[0] // 2 - x // 2, self.win.wm_maxsize()[1] // 2 - y // 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))
         self.win.minsize(width=x, height=y)
         if sys.platform == 'win32':

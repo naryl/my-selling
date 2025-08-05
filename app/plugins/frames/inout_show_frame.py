@@ -19,13 +19,15 @@
 
 
 """
-import tkFileDialog
-from Tkinter import *
-from ttk import *
+import tkinter.filedialog as tkFileDialog
+from tkinter import *
 
-import pdf
-from MultiListbox import MultiListbox
-from date_time import norm_date
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+import app.plugins.ext_lib.pdf
+from app.plugins.ext_lib.MultiListbox import MultiListbox
+from app.plugins.ext_lib.date_time import norm_date
 
 name = 'Приходы/Списания товара'
 frame = 1
@@ -39,6 +41,7 @@ class Plugin:
 
     def run(self):
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.title(name)
         x, y = 700, 450
         pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
@@ -121,7 +124,7 @@ class Income:
             path = self.app.app.app.sets.save_pdf
         except:
             path = ''
-        print rez
+        print(rez)
         filename = ('Приход товара за %s %s.pdf' % (norm_date(rez[0]), str(rez[1]))).replace(':', '-')
         f = tkFileDialog.asksaveasfilename(initialdir=path, initialfile=filename)
         if not f: return

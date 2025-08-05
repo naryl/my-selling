@@ -22,15 +22,19 @@
 import ast
 import os
 import time
-import tkMessageBox as box
-from Tkinter import *
+import tkinter.messagebox as box
+from tkinter import *
 
-from MultiListbox import MultiListbox
-from edit_log import Log
-from ttk import *
+from app.plugins.ext_lib.MultiListbox import MultiListbox
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.frames import add_outcome_frame, articles_frame, calc_frame, edit_frame, inart_frame, inout_show_frame, \
+    notepad_frame, outart_frame, phones_frame, receipts_frame, rest_frame, search_frame, show_by_day_frame, \
+    show_edit_log_frame, stat_frame
+from app.plugins.main.edit_log import Log
+from tkinter.ttk import *
 
-from number_to_string import get_string_by_number
-from act_tovar import Act
+from app.plugins.ext_lib.number_to_string import get_string_by_number
+from app.plugins.main.act_tovar import Act
 
 
 def date_now():
@@ -103,7 +107,7 @@ class Main:
                                textvariable=self.rate_var)
         self.rate_v.set('1')
         self.rate_v.pack(side='right', padx=10)
-        self.rate_v['values'] = range(1, 101)
+        self.rate_v['values'] = list(range(1, 101))
         self.rate_v.bind("<Return>", return_handler)
         self.rate_var.trace('w', self.update_total)
 
@@ -119,14 +123,14 @@ class Main:
         self.act_tovar_f.pack(fill=X, side='right')
 
         self.act_print_var = IntVar()
-        act_but_text_var = str(getattr(self.app.sets, 'act_but_text', 'Act').encode('utf-8'))
+        act_but_text_var = getattr(self.app.sets, 'act_but_text', 'Act')
         self.act_print_chk = Checkbutton(self.act_tovar_f, variable=self.act_print_var, onvalue=1, offvalue=0, 
                 command=self.clear_tovar_print_chk)
         self.act_print_chk.grid(row=0, column=1, padx=2, pady=2, sticky=NW)
         Label(self.act_tovar_f, text=act_but_text_var).grid(row=0, column=0, padx=2, pady=2, sticky=NW)
 
         self.tovar_print_var = IntVar()
-        tovar_but_text_var = str(getattr(self.app.sets, 'tovar_but_text', 'Check').encode('utf-8'))
+        tovar_but_text_var = getattr(self.app.sets, 'tovar_but_text', 'Check')
         self.tovar_print_chk = Checkbutton(self.act_tovar_f, variable=self.tovar_print_var, onvalue=1, offvalue=0, 
                 command=self.clear_act_print_chk)
         self.tovar_print_chk.grid(row=1, column=1, padx=2, pady=2, sticky=NW)
@@ -197,9 +201,9 @@ class Main:
         self.app.db.execute('select time,dep,article,sum,rate,name,art_id,edit from income where date=?', (date_now(),))
         for x in self.app.db.fetchall():
             out = list(x)
-            if out[7] <> 0:
+            if out[7] != 0:
                 out[1] = str(out[1]) + ' (≈)'
-            if out[6] <> -1:
+            if out[6] != -1:
                 out[1] = str(out[1]) + ' →'
 
             out.insert(5, round(x[3] * x[4], 2))
@@ -260,7 +264,7 @@ class Main:
             return
         txt = self.dep_name.get('0.0', END).replace('\r', '').replace('\n', ' ').replace('\t', ' ')
 
-        if self.cat_id <> -1:
+        if self.cat_id != -1:
             self.app.db.execute('select warning from dep where id=?', (int(self.cur_dep) + 1,))
             k = self.app.db.fetchall()[0][0]
             if k > 0:
@@ -275,7 +279,7 @@ class Main:
 
         dt, tm = date_now(), time_now()
         self.app.db.execute('insert into income values (?,?,?,?,?,?,?,?,0)',
-                            (dt, tm, int(self.cur_dep) + 1, txt, self.cat_id, sum, rate, self.app.user.decode('utf-8')))
+                            (dt, tm, int(self.cur_dep) + 1, txt, self.cat_id, sum, rate, self.app.user))
 
         # forming payload for act print
         act_print = self.act_print_var.get()
@@ -298,7 +302,7 @@ class Main:
             act_payloads = [act_info]
             self.act = Act(self.app)
 
-        if self.cat_id <> -1:
+        if self.cat_id != -1:
             self.app.db.execute('select rate from article where id=?', (self.cat_id,))
             rate = self.app.db.fetchall()[0][0] - rate
             self.app.db.execute('update article set rate=? where id=?', (rate, self.cat_id,))
@@ -424,7 +428,6 @@ class Main:
 
     def update_tools(self):
         """ Считается подитог """
-        deps = {}
         deps_sum = {}
         self.app.db.execute('select name from dep')
         for n, name in enumerate(self.app.db.fetchall()):
@@ -436,24 +439,23 @@ class Main:
         for x in out:
             in_all += float(x[1]) * float(x[2])
             deps_sum[x[0]] += float(x[1]) * float(x[2])
-        self.income_all.set('Доход: %s' % (in_all))
+        self.income_all.set('Доход: {:,.2f}'.format(in_all))
         self.list_1.delete(0, END)
 
         for x in deps_sum:
             if deps_sum[x]:
-                self.list_1.insert(END, self.deps[x - 1] + u'→ ' + str(deps_sum[x]))
+                self.list_1.insert(END, self.deps[x - 1] + u'→ ' + "{:,.2f}".format(deps_sum[x]))
 
         self.app.db.execute('select sum from outcome where date=?', (date_now(),))
         out = self.app.db.fetchall()
         out_all = 0
         for x in out:
             out_all += float(x[0])
-        self.outcome_all.set('Расход: %s' % (out_all))
-        self.all_all.set('Остаток: %s' % (in_all - out_all))
+        self.outcome_all.set('Расход: {:,.2f}'.format(out_all))
+        self.all_all.set('Остаток: {:,.2f}'.format(in_all - out_all))
         cashbox_value = self.app.sets.cashbox
-        cashbox_value_str = str(cashbox_value)
-        self.cashbox_all.set('Касса: %s' % (cashbox_value_str))
-        cashbox_color = 'red' if cashbox_value > 1000.0 else 'black'
+        self.cashbox_all.set('Касса: {:,.2f}'.format(float(cashbox_value)))
+        cashbox_color = 'red' if float(cashbox_value) > 1000.0 else 'black'
         self.cashbox_lbl.config(foreground=cashbox_color)
 
     def log_at_work(self):
@@ -464,7 +466,7 @@ class Main:
 
     def check_at_work(self):
         """ Проверить, есть ли запись о присутствии за сегодня для пользователя """
-        user = self.app.user.decode('utf-8')
+        user = self.app.user
         date = date_now()
         self.app.db.execute('select event from edit_log where title=? and event=? and date=?',
                             (u'Пользователь на месте', user, date))
@@ -486,9 +488,11 @@ class Main:
         plugins = self.load_plugins()
 
         # Загружаем список доступных плагинов для пользователя
-        self.app.db.execute('select caps from users where name=?', (self.app.user.decode('utf-8'),))
+        self.app.db.execute('select caps from users where name=?', (self.app.user,))
         caps_str = self.app.db.fetchall()[0][0].replace('\n', ' ').replace('\r', '')
-        caps = ast.literal_eval(caps_str)
+        if caps_str != "[]":
+            caps_str = caps_str.replace('[', '[b').replace(', ', ', b')
+        caps = [i.decode('utf-8') for i in ast.literal_eval(caps_str)]
 
         # Проверяем, нужно ли отображать табы (если все плагины с одного таба - не нужно)
         frames = [plugin['fr'] for plugin in plugins if plugin['name'] in caps or self.app.user == 'Администратор']
@@ -500,7 +504,7 @@ class Main:
             self.nb = Notebook(self.t_plugins_frame)
             self.nb.pack(fill=BOTH, expand=1, pady=5)
 
-            self.plugins_frame = range(3)
+            self.plugins_frame = list(range(3))
             # 3 вкладки
             imgs = ['sale', 'dep_db', 'misc']
             for x, name in enumerate(['Продажи', 'Товар', 'Прочее']):
@@ -550,21 +554,20 @@ class Main:
 
     @staticmethod
     def load_plugins():
-        s = os.listdir('app/plugins/frames')
+        plugin_modules = [add_outcome_frame, articles_frame, calc_frame, edit_frame, inart_frame, inout_show_frame,
+                          notepad_frame, outart_frame, phones_frame, receipts_frame, rest_frame, search_frame,
+                          show_by_day_frame, show_edit_log_frame, stat_frame]
 
         plugins = []
-        for x in s:
-            if x.endswith('.py'):
-                # импортируем, и получаем имя, название иконки, номер вкладки
-                obj = __import__(x[:-3])
-                name = getattr(obj, 'name')
-                fr = getattr(obj, 'frame')
-                if hasattr(obj, 'icon'):
-                    icon = getattr(obj, 'icon')
-                else:
-                    icon = 'plugins'
-                plugin = {'obj': obj, 'name': name, 'fr': fr, 'icon': icon}
-                plugins.append(plugin)
+        for module in plugin_modules:
+            name = getattr(module, 'name')
+            fr = getattr(module, 'frame')
+            if hasattr(module, 'icon'):
+                icon = getattr(module, 'icon')
+            else:
+                icon = 'plugins'
+            plugin = {'obj': module, 'name': name, 'fr': fr, 'icon': icon}
+            plugins.append(plugin)
         return plugins
 
     def show_plugin(self, obj):
@@ -574,6 +577,8 @@ class Main:
 
     def init_add_plugins(self, dt, tm):
         """ Вызывается после добавления """
+        # TODO: Заменить словариком плагинов (Пока их всё равно нет)
+        return
         s = os.listdir('app/plugins/income')
         for x in s:
             if x.endswith('.py'):

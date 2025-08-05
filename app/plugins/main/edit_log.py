@@ -20,7 +20,7 @@
 
 """
 
-from date_time import date_now, time_now, norm_date
+from app.plugins.ext_lib.date_time import date_now, time_now, norm_date
 
 
 class Log:
@@ -31,7 +31,7 @@ class Log:
     def del_income(self, date, tm, dep, art, pr, summa, rate, user):
         """Запись об уделании продажи """
         mess = u'Пользователь %s удалил продажу от %s %s\nОтдела #%s\nТовар: %s\nСумма: %s, количество: %s\nПо причине: %s' % (
-        user, norm_date(date).decode('utf-8'), tm, dep, art, summa, rate, pr)
+        user, norm_date(date), tm, dep, art, summa, rate, pr)
         self.db.execute('insert into edit_log values (?,?,?,?,?,?)',
                         (date_now(), time_now(), u'Удалена продажа', mess, date, tm))
         self.con.commit()
@@ -39,7 +39,7 @@ class Log:
     def del_outcome(self, date, tm, art, sum, c_user, user, pr):
         """Запись об уделании расхода """
         mess = u'Пользователь %s удалил расход от %s %s\nРасход: %s\nНа сумму: %s\nБыл сделан пользователем %s\nПричина: %s' % (
-        user, norm_date(date).decode('utf-8'), tm, art, sum, c_user, pr)
+        user, norm_date(date), tm, art, sum, c_user, pr)
         self.db.execute('insert into edit_log values (?,?,?,?,?,?)',
                         (date_now(), time_now(), u'Удален расход', mess, date, tm))
         self.con.commit()
@@ -47,17 +47,17 @@ class Log:
     def edit_income(self, date, tm, old, new, user, c_user):
         """Запись о редактировании продажи """
         ms = []
-        if old[0] <> new[0]:
+        if old[0] != new[0]:
             ms.append(u'Отдел с %s на %s' % (old[0], new[0]))
-        if old[1] <> new[1]:
+        if old[1] != new[1]:
             ms.append(u'Товар с %s на %s' % (old[1], new[1]))
-        if old[2] <> new[2]:
+        if old[2] != new[2]:
             ms.append(u'Количество с %s на %s' % (old[2], new[2]))
-        if old[3] <> new[3]:
+        if old[3] != new[3]:
             ms.append(u'Сумма с %s на %s' % (old[3], new[3]))
         if not ms: return
         mess = u'Пользователь %s изменил продажу от %s %s\nИзменения:\n%s\nБыла сделана пользователем %s' % (
-        user, norm_date(date).decode('utf-8'), tm, '\n'.join(ms), c_user)
+        user, norm_date(date), tm, '\n'.join(ms), c_user)
         self.db.execute('insert into edit_log values (?,?,?,?,?,?)',
                         (date_now(), time_now(), u'Отредактирована продажа', mess, date, tm))
         self.con.commit()
@@ -65,14 +65,14 @@ class Log:
     def edit_outcome(self, date, tm, old, new, user, c_user):
         """Запись о редактировании расхода """
         ms = []
-        if old[0] <> new[0]:
+        if old[0] != new[0]:
             ms.append(u'Причина с %s на %s' % (old[0], new[0]))
-        if old[1] <> new[1]:
+        if old[1] != new[1]:
             ms.append(u'Сумма с %s на %s' % (old[1], new[1]))
 
         if not ms: return
         mess = u'Пользователь %s изменил расход от %s %s\nИзменения:\n%s\nБыл сделан пользователем %s' % (
-        user, norm_date(date).decode('utf-8'), tm, '\n'.join(ms), c_user)
+        user, norm_date(date), tm, '\n'.join(ms), c_user)
         self.db.execute('insert into edit_log values (?,?,?,?,?,?)',
                         (date_now(), time_now(), u'Отредактирован расход', mess, date, tm))
         self.con.commit()
@@ -80,7 +80,7 @@ class Log:
     def del_phone(self, date, tm, phone, name, user, pr):
         """Запись об уделании телефона """
         mess = u'Пользователь %s удалил запись о клиенте от %s %s\Телефон: %s\nИмя: %s\nПричина: %s' % (
-            user, norm_date(date).decode('utf-8'), tm, phone, name, pr)
+            user, norm_date(date), tm, phone, name, pr)
         self.db.execute('insert into edit_log values (?,?,?,?,?,?)',
                         (date_now(), time_now(), u'Удалена запись', mess, date, tm))
         self.con.commit()
@@ -97,7 +97,7 @@ class Log:
 
         if not ms: return
         mess = u'Пользователь %s изменил запись о клиенте от %s %s\nИзменения:\n%s' % (
-            user, norm_date(date).decode('utf-8'), tm, '\n'.join(ms))
+            user, norm_date(date), tm, '\n'.join(ms))
         self.db.execute('insert into edit_log values (?,?,?,?,?,?)',
                         (date_now(), time_now(), u'Отредактирована запись', mess, date, tm))
         self.con.commit()
@@ -105,7 +105,7 @@ class Log:
     def del_receipt(self, date, tm, phone, name, user, pr):
         """Запись об уделании расписки """
         mess = u'Пользователь %s удалил запись о расписке от %s %s\Телефон: %s\nИмя: %s\nПричина: %s' % (
-            user, norm_date(date).decode('utf-8'), tm, phone, name, pr)
+            user, norm_date(date), tm, phone, name, pr)
         self.db.execute('insert into edit_log values (?,?,?,?,?,?)',
                         (date_now(), time_now(), u'Удалена запись', mess, date, tm))
         self.con.commit()
@@ -123,7 +123,7 @@ class Log:
         if not ms:
             return
         mess = u'Пользователь %s изменил запись о расписке от %s %s\nИзменения:\n%s' % (
-            user, norm_date(date).decode('utf-8'), tm, '\n'.join(ms))
+            user, norm_date(date), tm, '\n'.join(ms))
         self.db.execute('insert into edit_log values (?,?,?,?,?,?)',
                         (date_now(), time_now(), u'Отредактирована запись', mess, date, tm))
         self.con.commit()

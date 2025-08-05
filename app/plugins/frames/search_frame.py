@@ -19,11 +19,14 @@
 
 
 """
-from Tkinter import *
-from ttk import *
+import sys
+from tkinter import *
 
-from MultiListbox import MultiListbox
-from date_time import norm_date
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+from app.plugins.ext_lib.MultiListbox import MultiListbox
+from app.plugins.ext_lib.date_time import norm_date
 
 name = 'Поиск'
 frame = 2
@@ -39,7 +42,7 @@ class Plugin:
         self.win = Toplevel(self.app.app.win)
         self.win.title(name)
         x, y = 800, 400
-        pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
+        pos = self.win.wm_maxsize()[0] // 2 - x // 2, self.win.wm_maxsize()[1] // 2 - y // 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))
         self.win.maxsize(width=x, height=y)
         self.win.minsize(width=x, height=y)
@@ -66,6 +69,7 @@ class Income:
         """ фрейм с поиском товаров """
         self.app = app
         self.win = Frame(self.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.frame = LabelFrame(self.win, text='Что ищем?')
         self.frame.pack(fill=BOTH, expand=1, padx=5, pady=5)
 
@@ -97,9 +101,9 @@ class Income:
         for x in self.app.app.app.db.fetchall():
             x = list(x)
             x[0] = norm_date(x[0])
-            if x[8] <> 0:
+            if x[8] != 0:
                 x[2] = str(x[2]) + ' (≈)'
-            if x[7] <> -1:
+            if x[7] != -1:
                 x[2] = str(x[2]) + ' →'
             all_sum += x[4] * x[5]
             self.lst.insert(END, x)
@@ -143,7 +147,7 @@ class Outcome:
         for x in self.app.app.app.db.fetchall():
             x = list(x)
             x[0] = norm_date(x[0])
-            if x[5] <> 0:
+            if x[5] != 0:
                 x[2] = u'(≈) ' + x[2]
 
             self.lst.insert(END, x)

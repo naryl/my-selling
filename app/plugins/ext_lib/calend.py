@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from Tkinter import *
+from tkinter import *
 
 from calendar import setfirstweekday, monthcalendar
 
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
 
     def some_function(date_):  # эта функция будет вызываться при щелкании на дату...
-        print date_
+        print(str(date_))
 
 
     # вводим дополнительный пераметр command

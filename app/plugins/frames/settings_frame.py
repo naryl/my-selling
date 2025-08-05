@@ -24,15 +24,17 @@ import json
 import os
 import subprocess
 import time
-import tkMessageBox as box
+import tkinter.messagebox as box
 import urllib
 import zipfile
-from ScrolledText import ScrolledText
-from Tkinter import *
-from ttk import *
+from tkinter.scrolledtext import ScrolledText
+from tkinter import *
 
-import md5py
-from date_time import int2date
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+import app.plugins.ext_lib.md5py as md5py
+from app.plugins.ext_lib.date_time import int2date
 
 name = 'Настройки'
 frame = 2
@@ -47,6 +49,7 @@ class Plugin:
     def run(self):
         self.reload = False
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.protocol("WM_DELETE_WINDOW", self.exit)
         self.win.title(name)
         x, y = 700, 320
@@ -79,7 +82,7 @@ class Plugin:
                 self.app.app.root.destroy()
                 try:
                     subprocess.Popen(sys.argv[0])
-                except WindowsError, x:
+                except WindowsError as x:
                     subprocess.Popen('pythonw ' + sys.argv[0])
 
 
@@ -547,7 +550,7 @@ class Updates():
             resp = urllib.urlopen(serv + '/updates', urllib.urlencode(data)).read()
             resp_str = resp.replace('\n', ' ').replace('\r', '')
             resp = ast.literal_eval(resp_str)
-        except Exception, x:
+        except Exception as x:
             self.txt.insert(END, 'Не удалось подключиться к серверу обновлений :(')
             self.win.update()
             self.check_b['state'] = 'normal'
@@ -583,8 +586,8 @@ class Updates():
                     os.remove('app/updates/' + f)
                     self.down_but['state'] = 'normal'
                     return
-            except Exception, o:
-                print o
+            except Exception as o:
+                print(str(o))
                 self.txt.insert(END, 'Не удалось загрузить обновления...\n')
                 self.down_but['state'] = 'normal'
                 return
@@ -733,7 +736,7 @@ class Options:
         self.act_frame.grid(padx=5, row=3, column=4, columnspan=2, rowspan=5, sticky=N)
 
         self.act_but_text_var = StringVar()
-        self.act_but_text_var.set(str(getattr(self.app.app.app.sets, 'act_but_text', 'Act').encode('utf-8')))
+        self.act_but_text_var.set(getattr(self.app.app.app.sets, 'act_but_text', 'Act'))
         Label(self.act_frame, text='Кнопка Акт').grid(row=0, column=0, padx=5)
         self.act_but_text_ent = Entry(self.act_frame, width=10, cursor='xterm',
                                          textvariable=self.act_but_text_var)

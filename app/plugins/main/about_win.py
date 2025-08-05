@@ -19,21 +19,24 @@
 
 
 """
-
-import tkFont as tfont
+import sys
+import tkinter.font as tfont
 import webbrowser
-from ScrolledText import ScrolledText
-from Tkinter import *
-from ttk import *
+from tkinter.scrolledtext import ScrolledText
+from tkinter import *
+
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
 
 
 class Main:
     def __init__(self, app):
         self.app = app
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.title('О программе')
         x, y = 600, 400
-        pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
+        pos = self.win.wm_maxsize()[0] // 2 - x // 2, self.win.wm_maxsize()[1] // 2 - y // 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))
         self.win.maxsize(width=x, height=y)
         self.win.minsize(width=x, height=y)

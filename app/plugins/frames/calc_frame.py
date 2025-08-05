@@ -30,13 +30,19 @@ icon = 'calc'
 class Plugin:
     def __init__(self, app):
         self.app = app
+        self.calc_proc = None
+
+    def try_execute(self, calc_app):
+        try:
+            if self.calc_proc is not None:
+                self.app.calc_proc.terminate()
+            self.app.calc_proc = subprocess.Popen(calc_app)
+            return True
+        except FileNotFoundError:
+            return False
 
     def run(self):
         if sys.platform == 'win32':
-            calc_app = "calc.exe"
+            self.try_execute("calc.exe")
         else:
-            calc_app = "kcalc"
-
-        if hasattr(self.app, "calc_proc"):
-            self.app.calc_proc.terminate()
-        self.app.calc_proc = subprocess.Popen(calc_app)
+            any(map(self.try_execute, ["speedcrunch", "kcalc"]))

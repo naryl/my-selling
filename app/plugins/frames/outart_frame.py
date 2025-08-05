@@ -20,11 +20,13 @@
 
 """
 import ast
-import tkMessageBox as box
-from Tkinter import *
-from ttk import *
+import tkinter.messagebox as box
+from tkinter import *
 
-from date_time import date_now, time_now
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+from app.plugins.ext_lib.date_time import date_now, time_now
 
 name = 'Списание товара'
 frame = 1
@@ -39,6 +41,7 @@ class Plugin:
     def run(self):
 
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.title(name)
         x, y = 700, 120
         pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2

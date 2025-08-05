@@ -19,15 +19,18 @@
 
 
 """
+import sys
 import time
-import tkFileDialog
-from Tkinter import *
-from ttk import *
+import tkinter.filedialog as tkFileDialog
+from tkinter import *
 
-import pdf
-from MultiListbox import MultiListbox
-from calend import TkCalendar
-from date_time import date_now, norm_date
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+import app.plugins.ext_lib.pdf
+from app.plugins.ext_lib.MultiListbox import MultiListbox
+from app.plugins.ext_lib.calend import TkCalendar
+from app.plugins.ext_lib.date_time import date_now, norm_date
 
 name = 'Просмотреть продажи'
 frame = 0
@@ -42,9 +45,10 @@ class Plugin:
     def run(self):
 
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.title(name)
         x, y = 800, 450
-        pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
+        pos = self.win.wm_maxsize()[0] // 2 - x // 2, self.win.wm_maxsize()[1] // 2 - y // 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))
         self.win.maxsize(width=x, height=y)
         self.win.minsize(width=x, height=y)
@@ -114,9 +118,9 @@ class Plugin:
         income_all = 0
         for x in self.app.app.db.fetchall():
             out = list(x)
-            if out[7] <> 0:
+            if out[7] != 0:
                 out[1] = str(out[1]) + ' (≈)'
-            if out[6] <> -1:
+            if out[6] != -1:
                 out[1] = str(out[1]) + ' →'
             out.insert(5, round(x[3] * x[4], 2))
             income_all += x[3] * x[4]
@@ -127,18 +131,17 @@ class Plugin:
         self.app.app.db.execute('select time,article,sum,name,art_id,edit from outcome where date=?', (self.c_date,))
         for x in self.app.app.db.fetchall():
             out = list(x)
-            if out[5] <> 0:
+            if out[5] != 0:
                 out[1] = u'(≈) ' + out[1]
             self.lst2.insert(END, out)
             outcome_all += out[2]
         self.lst2.see(END)
-        self.in_label['text'] = 'Доход: %s' % (income_all)
-        self.out_label['text'] = 'Расход: %s' % (outcome_all)
-        self.all_label['text'] = 'Остаток: %s' % (income_all - outcome_all)
+        self.in_label['text'] = 'Доход: {:,.2f}'.format(income_all)
+        self.out_label['text'] = 'Расход: {:,.2f}'.format(outcome_all)
+        self.all_label['text'] = 'Остаток: {:,.2f}'.format(income_all - outcome_all)
         s = 'За дату: %s' % (norm_date(self.c_date))
         self.d_label['text'] = s
 
-        deps = {}
         deps_sum = {}
         self.app.app.db.execute('select name from dep')
 
@@ -160,7 +163,7 @@ class Plugin:
 
         for x in deps_sum:
             if deps_sum[x]:
-                self.list_1.insert(END, str(x) + ' ' + self.deps[x - 1] + u'→ ' + str(deps_sum[x]))
+                self.list_1.insert(END, str(x) + ' ' + self.deps[x - 1] + u'→ ' + "{:,.2f}".format(deps_sum[x]))
 
     def generate_pdf(self):
         """ генерация pdf. Ваш К.О. """
@@ -184,9 +187,9 @@ class Plugin:
         income_all = 0
         for x in self.app.app.db.fetchall():
             out = list(x)
-            if out[7] <> 0:
+            if out[7] != 0:
                 out[1] = str(out[1]) + u' (≈)'
-            if out[6] <> -1:
+            if out[6] != -1:
                 out[1] = str(out[1]) + u' →'
             out.insert(5, x[3] * x[4])
             income_all += x[3] * x[4]
@@ -202,7 +205,7 @@ class Plugin:
         self.app.app.db.execute('select time,article,sum,name,art_id,edit from outcome where date=?', (self.c_date,))
         for x in self.app.app.db.fetchall():
             out = list(x)
-            if out[5] <> 0:
+            if out[5] != 0:
                 out[1] = u'(≈) ' + out[1]
             doc.table([(out[0], 45), (out[1], 220), (out[2], 40), (out[3], 90)], font=10)
             outcome_all += out[2]

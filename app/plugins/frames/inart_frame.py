@@ -20,12 +20,14 @@
 
 """
 import ast
-import tkMessageBox as box
-from Tkinter import *
-from ttk import *
+import tkinter.messagebox as box
+from tkinter import *
 
-from MultiListbox import MultiListbox
-from date_time import date_now, time_now
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+from app.plugins.ext_lib.MultiListbox import MultiListbox
+from app.plugins.ext_lib.date_time import date_now, time_now
 
 name = 'Приход товара'
 frame = 1
@@ -41,6 +43,7 @@ class Plugin:
 
         self.win = Toplevel(self.app.app.win)
         self.win.title(name)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         x, y = 800, 350
         pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))

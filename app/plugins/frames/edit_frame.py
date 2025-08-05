@@ -19,17 +19,20 @@
 
 
 """
+import sys
 import time
-import tkMessageBox as box
-from Tkinter import *
-from ttk import *
+import tkinter.messagebox as box
+from tkinter import *
 
-from MultiListbox import MultiListbox
-from calend import TkCalendar
-from date_time import date_now, norm_date
-from edit_log import Log
-from number_to_string import get_string_by_number
-from act_tovar import Act
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+from app.plugins.ext_lib.MultiListbox import MultiListbox
+from app.plugins.ext_lib.calend import TkCalendar
+from app.plugins.ext_lib.date_time import date_now, norm_date
+from app.plugins.ext_lib.number_to_string import get_string_by_number
+from app.plugins.main.edit_log import Log
+from app.plugins.main.act_tovar import Act
 
 name = 'Редактировать'
 frame = 0
@@ -44,10 +47,11 @@ class Plugin:
     def run(self):
         self.log = Log(self.app.app)
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.title(name)
         self.win.protocol("WM_DELETE_WINDOW", self.exit)
-        x, y = 850, 450
-        pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
+        x, y = 800, 450
+        pos = self.win.wm_maxsize()[0] // 2 - x // 2, self.win.wm_maxsize()[1] // 2 - y // 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))
         self.win.maxsize(width=x, height=y)
         self.win.minsize(width=x, height=y)
@@ -121,9 +125,9 @@ class Plugin:
         for x in self.app.app.db.fetchall():
             out = list(x)
 
-            if out[8] <> 0:
+            if out[8] != 0:
                 out[1] = str(out[1]) + ' (≈)'
-            if out[6] <> -1:
+            if out[6] != -1:
                 out[1] = str(out[1]) + ' →'
             out.insert(5, round(x[3] * x[4], 2))
             income_all += x[3] * x[4]
@@ -136,7 +140,8 @@ class Plugin:
                                 (self.c_date,))
         for x in self.app.app.db.fetchall():
             out = list(x)
-            if out[6] <> 0:
+            out[3] = out[3].decode('utf8')
+            if out[6] != 0:
                 out[1] = u'(≈) ' + out[1]
             self.lst2.insert(END, out)
             self.current_outcome.append(x)
@@ -179,8 +184,8 @@ class Plugin:
         self.act_tovar_f = Frame(self.edit_frame)
         self.act_tovar_f.grid(row=1, column=3)
 
-        act_but_text_var = str(getattr(self.app.app.sets, 'act_but_text', 'Act').encode('utf-8'))
-        tovar_but_text_var = str(getattr(self.app.app.sets, 'tovar_but_text', 'Check').encode('utf-8'))
+        act_but_text_var = str(getattr(self.app.app.sets, 'act_but_text', 'Act'))
+        tovar_but_text_var = str(getattr(self.app.app.sets, 'tovar_but_text', 'Check'))
 
         self.save_but = Button(self.act_tovar_f, text=act_but_text_var, image=self.app.app.img['csv'], compound='left',
                                command=self.print_act)
@@ -257,7 +262,7 @@ class Plugin:
         self.app.app.sets.cashbox = cashbox_value
 
         self.update_lists()
-        self.log.del_income(c[7], c[0], c[1], c[2], text, c[3], c[4], self.app.app.user.decode('utf-8'))
+        self.log.del_income(c[7], c[0], c[1], c[2], text, c[3], c[4], self.app.app.user)
 
     def delete_outcome(self):
         """ Удаление расхода """
@@ -277,7 +282,7 @@ class Plugin:
         self.app.app.sets.cashbox = cashbox_value
 
         self.update_lists()
-        self.log.del_outcome(c[5], c[0], c[1], c[2], c[3], self.app.app.user.decode('utf-8'), text)
+        self.log.del_outcome(c[5], c[0], c[1], c[2], c[3], self.app.app.user, text)
 
     def save_income(self, act_print=0, tovar_print=0):
         """ сохранение отредактированной продажи """
@@ -316,7 +321,7 @@ class Plugin:
         self.update_lists()
         self.lst.selection_set(i)
         self.log.edit_income(c[7], c[0], [c[1], c[2], c[4], c[3]], [dep, art, kvo, summa],
-                             self.app.app.user.decode('utf-8'), c[5])
+                             self.app.app.user, c[5])
 
         # forming payload for act print
         total = round(float(kvo) * float(summa), 2)

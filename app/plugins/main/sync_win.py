@@ -20,11 +20,14 @@
 
 """
 import json
+import sys
 import urllib
-from Tkinter import *
-from ttk import *
+from tkinter import *
 
-from date_time import date_now, time_now, date2int
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+from app.plugins.ext_lib.date_time import date_now, time_now, date2int
 
 
 class Main:
@@ -32,6 +35,7 @@ class Main:
         self.app = app
 
         self.win = Frame(self.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.place(relx=0.5, rely=0.5, anchor=CENTER)
 
         self.lab = Label(self.win, text='', font=('bold', 12))
@@ -42,7 +46,7 @@ class Main:
     def work(self):
         try:
             self.sync()
-        except Exception, x:
+        except Exception as x:
             self.lab['text'] = 'Не удалось отправить данных на сервер!'
             self.lab['background'] = 'red'
             self.lab['foreground'] = 'white'

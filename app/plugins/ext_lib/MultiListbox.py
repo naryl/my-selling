@@ -1,12 +1,13 @@
-from Tkinter import *
+from tkinter import *
 
-from ttk import *
+from app.plugins.ext_lib.ttk import *
 
 
 class MultiListbox(Frame):
     def __init__(self, master, lists, font=('normal', 14), height=100, command=None):
         self.cl = command
-        Frame.__init__(self, master)
+        super().__init__(master)
+        self.line = 1
         self.lists = []
         for l, w in lists:
             frame = Frame(self)
@@ -58,7 +59,7 @@ class MultiListbox(Frame):
             delta = 1
         if e_num == 4 or e_delta > 0:
             delta = -1
-        self._scroll('scroll', delta, 'units')
+        self._scroll(delta)
         return 'break'
 
     def _bound_to_mousewheel(self, _):
@@ -67,9 +68,19 @@ class MultiListbox(Frame):
     def _unbound_to_mousewheel(self, _):
         self.unbind_all("<MouseWheel>")
 
-    def _scroll(self, *args):
+    def _scroll(self, delta):
+        self.line += delta
+        if self.line < 0:
+            self.line = 0
+        if self.lists[0].yview()[1] >= 1.0 and delta > 0:
+            self.line -= delta
         for l in self.lists:
-            apply(l.yview, args)
+            l.yview(self.line)
+
+    def _update_line(self):
+        top_part = self.lists[0].yview()[0]
+        length = self.index(END)
+        self.line = int(top_part * length)
 
     def curselection(self):
         return self.lists[0].curselection()
@@ -77,16 +88,17 @@ class MultiListbox(Frame):
     def delete(self, first, last=None):
         for l in self.lists:
             l.delete(first, last)
+        self._update_line()
 
     def get(self, first, last=None):
         result = []
         for l in self.lists:
             result.append(l.get(first, last))
-        if last: return apply(map, [None] + result)
+        if last: return list(map(*([None] + result)))
         return result
 
     def index(self, index):
-        self.lists[0].index(index)
+        return self.lists[0].index(index)
 
     def insert(self, index, *elements):
         for e in elements:
@@ -94,6 +106,7 @@ class MultiListbox(Frame):
             for l in self.lists:
                 l.insert(index, e[i])
                 i = i + 1
+        self._update_line()
 
     def size(self):
         return self.lists[0].size()
@@ -101,6 +114,7 @@ class MultiListbox(Frame):
     def see(self, index):
         for l in self.lists:
             l.see(index)
+        self._update_line()
 
     def selection_anchor(self, index):
         for l in self.lists:

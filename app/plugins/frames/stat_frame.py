@@ -20,11 +20,13 @@
 
 """
 import time
-from Tkinter import *
-from ttk import *
+from tkinter import *
 
-from calend import TkCalendar
-from date_time import date_now, norm_date, all_dates
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
+
+from app.plugins.ext_lib.calend import TkCalendar
+from app.plugins.ext_lib.date_time import date_now, norm_date, all_dates
 
 name = 'Статистика по...'
 frame = 2
@@ -39,6 +41,7 @@ class Plugin:
     def run(self):
 
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.title(name)
         x, y = 600, 400
         pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
@@ -135,10 +138,10 @@ class Plugin:
         if per == -1 and dep == -1:
             self.app.app.db.execute('select date,sum,rate from income where date between ? and ?',
                                     (self.c_date, self.c_date2))
-        elif per == -1 and dep <> -1:
+        elif per == -1 and dep != -1:
             self.app.app.db.execute('select date,sum,rate from income where dep=? and date between ? and ?',
                                     (dep, self.c_date, self.c_date2))
-        elif per <> -1 and dep == -1:
+        elif per != -1 and dep == -1:
             self.app.app.db.execute('select date,sum,rate from income where name=? and date between ? and ?',
                                     (per, self.c_date, self.c_date2))
         else:

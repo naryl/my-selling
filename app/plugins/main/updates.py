@@ -23,10 +23,10 @@ import os
 import subprocess
 import sys
 import time
-import tkMessageBox as box
+import tkinter.messagebox as box
 import zipfile
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from app.plugins.ext_lib.ttk import *
 
 
 class Main:
@@ -65,7 +65,7 @@ class Main:
             self.app.root.destroy()
             try:
                 subprocess.Popen(sys.argv[0])
-            except WindowsError, x:
+            except WindowsError:
                 subprocess.Popen('pythonw ' + sys.argv[0])
             sys.exit(0)
 

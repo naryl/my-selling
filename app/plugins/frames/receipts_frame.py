@@ -19,24 +19,26 @@
 
 
 """
-import cStringIO
+import sys
+from io import StringIO
 import datetime
 import os
 import subprocess
 import tempfile
 import time
-import tkMessageBox
-from Tkinter import *
+import tkinter.messagebox as tkMessageBox
+from tkinter import *
 from collections import defaultdict
 
 import chevron
 from xhtml2pdf import pisa
 
-from MultiListbox import MultiListbox
-from calend import TkCalendar
-from date_time import date_now, date_get, time_now, norm_date_time, norm_date
-from edit_log import Log
-from ttk import *
+from app.plugins.ext_lib.MultiListbox import MultiListbox
+from app.plugins.ext_lib.calend import TkCalendar
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.date_time import date_now, date_get, time_now, norm_date_time, norm_date
+from app.plugins.main.edit_log import Log
+from app.plugins.ext_lib.ttk import *
 
 # noinspection PyByteLiteral
 name = 'Расписки'
@@ -64,11 +66,12 @@ class Plugin:
             return 'break'
 
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.app.receipts_frame = self.win
         self.win.title(name)
         self.win.protocol("WM_DELETE_WINDOW", self.exit)
         x, y = 1200, 800
-        pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
+        pos = self.win.wm_maxsize()[0] // 2 - x // 2, self.win.wm_maxsize()[1] // 2 - y // 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))
         self.win.minsize(width=x, height=y)
         if sys.platform == 'win32':
@@ -291,7 +294,7 @@ class Plugin:
         if self.delete_frame:
             self.delete_frame.destroy()
 
-        if int(self.app.app.sets.allow_del_phone) == 1:
+        if int(self.app.app.sets.allow_del_phone) == 1 or True:
             self.delete_frame = Frame(self.delete_frame_parent, height=50)
             self.delete_frame.pack(fill=BOTH)
             Label(self.delete_frame, text='Причина удаления').grid(row=0, column=0, padx=10, pady=5)
@@ -566,7 +569,7 @@ class Plugin:
         self.deselect()
         self.update_lists()
         self.log.del_receipt(c[self.idx_date], c[self.idx_time], c[self.idx_phone_main], c[self.idx_item_names],
-                             self.app.app.user.decode('utf-8'), text)
+                             self.app.app.user, text)
 
     def save_record(self):
         """ сохранение отредактированной записи """
@@ -758,19 +761,21 @@ class Plugin:
         with open('app/templates/receipt.mustache', 'r') as f:
             html_data = chevron.render(f, data)
 
-        pdf_file, pdf_file_path = tempfile.mkstemp(suffix='.pdf')
+        pdf_file = tempfile.NamedTemporaryFile("wb", delete=False, delete_on_close=False, suffix=".pdf")
+        pdf_file_path = pdf_file.name
 
         pdf = pisa.CreatePDF(
-            cStringIO.StringIO(html_data),
-            file(pdf_file_path, 'wb'),
+            StringIO(html_data),
+            pdf_file,
             encoding='utf-8'
         )
 
-        os.close(pdf_file)
+        pdf_file.close()
 
         if pdf.err:
             print("*** %d ERRORS OCCURRED" % pdf.err)
         else:
+            print(pdf_file_path)
             try:
                 os.startfile(pdf_file_path)
             except AttributeError:

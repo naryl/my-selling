@@ -20,18 +20,21 @@
 
 """
 import datetime
+import sys
 import time
-import tkFileDialog
-import tkMessageBox
-from Tkinter import *
+import tkinter.filedialog as tkFileDialog
+import tkinter.messagebox as tkMessageBox
+from tkinter import *
 
 import csv
-import receipts_frame
-from MultiListbox import MultiListbox
-from calend import TkCalendar
-from date_time import date_now, date_get, time_now, norm_date
-from edit_log import Log
-from ttk import *
+
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.frames import receipts_frame
+from app.plugins.ext_lib.MultiListbox import MultiListbox
+from app.plugins.ext_lib.calend import TkCalendar
+from app.plugins.ext_lib.date_time import date_now, date_get, time_now, norm_date
+from app.plugins.ext_lib.ttk import *
+from app.plugins.main.edit_log import Log
 
 # noinspection PyByteLiteral
 name = 'Телефоны и Заказы'
@@ -57,11 +60,12 @@ class Plugin:
             return 'break'
 
         self.win = Toplevel(self.app.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.app.phones_frame = self.win
         self.win.title(name)
         self.win.protocol("WM_DELETE_WINDOW", self.exit)
         x, y = 1200, 800
-        pos = self.win.wm_maxsize()[0] / 2 - x / 2, self.win.wm_maxsize()[1] / 2 - y / 2
+        pos = self.win.wm_maxsize()[0] // 2 - x // 2, self.win.wm_maxsize()[1] // 2 - y // 2
         self.win.geometry('%sx%s+%s+%s' % (x, y, pos[0], pos[1] - 25))
         self.win.minsize(width=x, height=y)
         if sys.platform == 'win32':
@@ -108,6 +112,7 @@ class Plugin:
         self.done_color = '#CFCFC4'
         self.today_color = '#79B47C'
         self.outdated_color = '#FF6961'
+        self.stored_data = {}
 
     def init_date_filter_ui(self):
         days_delta = -30
@@ -243,8 +248,10 @@ class Plugin:
             self.current_records.append(x)
         self.lst.see(END)
 
-    def list_select(self):
+    def list_select(self, deselecting=False):
         """ при щелчке на записи """
+        if len(self.stored_data) == 0 and not deselecting:
+            self.store_new_data()
         self.search_res_lst.pack_forget()
         self.edit_frame.destroy()
         self.edit_frame = Frame(self.edit_frame_parent, height=100)
@@ -252,7 +259,7 @@ class Plugin:
         if self.delete_frame:
             self.delete_frame.destroy()
 
-        if int(self.app.app.sets.allow_del_phone) == 1:
+        if int(self.app.app.sets.allow_del_phone) == 1 or True:
             self.delete_frame = Frame(self.delete_frame_parent, height=50)
             self.delete_frame.pack(fill=BOTH)
             Label(self.delete_frame, text='Причина удаления').grid(row=0, column=0, padx=10, pady=5)
@@ -269,10 +276,7 @@ class Plugin:
 
         # валидация телефона
         def isdigit(p):
-            if isinstance(p, unicode):
-                return unicode.isdigit(p)
-            else:
-                return str.isdigit(p)
+            return str.isdigit(p)
 
         v_phone_cmd = (self.win.register(lambda p: isdigit(p) or p == ""))
 
@@ -283,36 +287,47 @@ class Plugin:
             if len(entry_text.get()) == limit:
                 self.name_ent.focus()
 
+        top_line = Frame(self.edit_frame)
+        top_line.grid(row=0, column=1, columnspan=5, sticky=W)
+
         Label(self.edit_frame, text='Телефон').grid(row=0, column=0, padx=2, pady=2)
         self.phone_text = StringVar()
-        self.phone_ent = Entry(self.edit_frame, width=13, cursor='xterm', font=('normal', 14),
+        self.phone_ent = Entry(top_line, width=13, cursor='xterm', font=('normal', 14),
                                textvariable=self.phone_text,
-                               validate='all', validatecommand=(v_phone_cmd, '%P'))
+                               validate='all')
         self.phone_text.trace("w", lambda *args: character_limit(self.phone_text, 11))
-        self.phone_ent.grid(row=0, column=1, padx=2, pady=2)
+        self.phone_ent.grid(row=0, column=0, padx=2, pady=2, sticky=W)
 
-        Label(self.edit_frame, text='Имя').grid(row=0, column=2, padx=2, pady=2)
+        Label(top_line, text='Имя').grid(row=0, column=1, padx=2, pady=2, sticky=W)
         self.name_text = StringVar()
-        self.name_ent = Entry(self.edit_frame, width=16, cursor='xterm', font=('normal', 14),
+        self.name_ent = Entry(top_line, width=16, cursor='xterm', font=('normal', 14),
                               textvariable=self.name_text)
-        self.name_ent.grid(row=0, column=3, padx=2, pady=2)
+        self.name_ent.grid(row=0, column=2, padx=2, pady=2, sticky=W)
 
         Label(self.edit_frame, text='Детали').grid(row=1, column=0, padx=2, pady=2)
         self.details_text = StringVar()
-        self.details_ent = Entry(self.edit_frame, width=80, cursor='xterm', font=('normal', 14),
-                                 textvariable=self.details_text)
-        self.details_ent.grid(row=1, column=1, columnspan=7, padx=2, pady=2)
+        self.details_ent = Text(self.edit_frame, width=80, cursor='xterm', font=('normal', 14),
+                                height=2, wrap="word")
+        def details_modified(ev):
+            self.last_edit_time = time.time()
+        self.details_ent.bind_all('<Key>', details_modified)
+        self.details_ent.grid(row=1, column=1, columnspan=7, padx=2, pady=2, sticky=NSEW)
 
-        Label(self.edit_frame, text='Сделано').grid(row=0, column=4, padx=2, pady=2)
+        Label(top_line, text='Сделано').grid(row=0, column=3, padx=2, pady=2, sticky=W)
         self.done_var = IntVar()
-        self.done_chk = Checkbutton(self.edit_frame, variable=self.done_var, onvalue=1, offvalue=0)
-        self.done_chk.grid(row=0, column=5, padx=2, pady=2)
+        self.done_chk = Checkbutton(top_line, variable=self.done_var, onvalue=1, offvalue=0)
+        self.done_chk.grid(row=0, column=4, padx=2, pady=2, sticky=W)
 
         Label(self.edit_frame, text='Что сделано').grid(row=2, column=0, padx=2, pady=2)
         self.done_details_text = StringVar()
-        self.done_details_ent = Entry(self.edit_frame, width=80, cursor='xterm', font=('normal', 14),
-                                      textvariable=self.done_details_text)
-        self.done_details_ent.grid(row=2, column=1, columnspan=7, padx=2, pady=2)
+        self.done_details_ent = Text(self.edit_frame, width=80, cursor='xterm', font=('normal', 14),
+                                      height=1, wrap="word")
+        def done_details_modified(ev):
+            self.last_edit_time = time.time()
+        self.done_details_ent.bind_all('<Key>', done_details_modified)
+        self.done_details_ent.grid(row=2, column=1, columnspan=7, padx=2, pady=2, sticky=NSEW)
+
+        self.edit_frame.columnconfigure(1, weight=1)
 
         if not self.lst.curselection():
             self.create_mode()
@@ -336,11 +351,11 @@ class Plugin:
         self.phone_ent.insert(0, c[self.idx_phone])
         self.name_ent.delete(0, END)
         self.name_ent.insert(0, c[self.idx_name])
-        self.details_ent.delete(0, END)
-        self.details_ent.insert(0, c[self.idx_details])
+        self.details_ent.delete('1.0', END)
+        self.details_ent.insert('1.0', c[self.idx_details])
         self.done_var.set(1 if c[self.idx_done] else 0)
-        self.done_details_ent.delete(0, END)
-        self.done_details_ent.insert(0, c[self.idx_done_details])
+        self.done_details_ent.delete('1.0', END)
+        self.done_details_ent.insert('1.0', c[self.idx_done_details])
 
         # отмена после 10 секунд бездействия
         self.timeout = 10
@@ -355,8 +370,8 @@ class Plugin:
                     return
                 cur_time = time.time()
                 delta = cur_time - self.last_edit_time
-                self.progress_bar['value'] = 100 - delta * 10
-                if delta >= 10:
+                self.progress_bar['value'] = 100 - delta * 3.33
+                if delta >= 30:
                     self.deselect()
                 else:
                     self.app.app.root.after(1000, check_timeout)
@@ -368,9 +383,9 @@ class Plugin:
 
         self.phone_text.trace('w', reset_timeout_handler)
         self.name_text.trace('w', reset_timeout_handler)
-        self.details_text.trace('w', reset_timeout_handler)
+        #self.details_text.trace('w', reset_timeout_handler)
         self.done_var.trace('w', reset_timeout_handler)
-        self.done_details_text.trace('w', reset_timeout_handler)
+        #self.done_details_text.trace('w', reset_timeout_handler)
 
         self.app.app.root.after(1000, check_timeout)
 
@@ -379,9 +394,12 @@ class Plugin:
         self.save_but = Button(self.edit_frame, text='Добавить', image=self.app.app.img['save'], compound='left',
                                command=self.create_record)
         self.save_but.grid(row=3, column=6, pady=2)
+        self.cancel_but = Button(self.edit_frame, text='Отмена', image=self.app.app.img['cancel'], compound='left',
+                                 command=self.deselect)
+        self.cancel_but.grid(row=3, column=7, pady=2)
         self.receipt_but = Button(self.edit_frame, text='Расписка', image=self.app.app.img['sale'], compound='left',
                                   command=self.create_receipt)
-        self.receipt_but.grid(row=3, column=7, padx=2, pady=2, sticky=E)
+        self.receipt_but.grid(row=0, column=7, padx=2, pady=2, sticky=E)
 
         self.phone_text.trace("w", lambda *args: self.search())
 
@@ -409,6 +427,7 @@ class Plugin:
         self.update_lists()
         self.log.del_phone(c[self.idx_date], c[self.idx_time], c[self.idx_phone], c[self.idx_name],
                            self.app.app.user.decode('utf-8'), text)
+        self.deselect()
 
     def save_record(self):
         """ сохранение отредактированной записи """
@@ -416,9 +435,9 @@ class Plugin:
             return
         phone = self.phone_ent.get()
         name_val = self.name_ent.get()
-        details = self.details_ent.get()
+        details = self.details_ent.get("1.0", END)[:-1]
         done = self.done_var.get()
-        done_details = self.done_details_ent.get()
+        done_details = self.done_details_ent.get("1.0", END)[:-1]
         done_dt, done_tm = (None, None)
 
         if not phone and not name_val and not details:
@@ -443,7 +462,7 @@ class Plugin:
         self.log.edit_phone(c[self.idx_date], c[self.idx_time],
                             [c[self.idx_phone], c[self.idx_name], c[self.idx_details]],
                             [phone, name_val, details],
-                            self.app.app.user.decode('utf-8'))
+                            self.app.app.user)
 
     def create_receipt(self):
         """ формирование расписки по текущей записи"""
@@ -458,9 +477,9 @@ class Plugin:
             'diag_time': '3',
             'item_device': '',
             'item_serial': '',
-            'item_declared_defect': self.details_text.get(),
+            'item_declared_defect': self.details_ent.get("1.0", END)[:-1],
             'item_existing_damage': '',
-            'item_alleged_defect': self.done_details_text.get(),
+            'item_alleged_defect': self.done_details_ent.get("1.0", END)[:-1],
             'item_repair_time': '2-3 дня(ей)'
         }
         receipt_window = receipts_frame.Plugin(self.app)
@@ -472,9 +491,9 @@ class Plugin:
         dt, tm = date_now(), time_now()
         phone = self.phone_ent.get()
         name = self.name_ent.get()
-        details = self.details_ent.get()
+        details = self.details_ent.get("1.0", END)[:-1]
         done = self.done_var.get()
-        done_details = self.done_details_ent.get()
+        done_details = self.done_details_ent.get("1.0", END)[:-1]
         done_dt, done_tm = (date_now(), time_now()) if done else (None, None)
 
         if not phone and not name and not details:
@@ -494,8 +513,34 @@ class Plugin:
         self.list_select()
 
     def deselect(self):
-        self.lst.selection_clear(self.lst.curselection())
-        self.list_select()
+        if curselection := self.lst.curselection():
+            self.lst.selection_clear(curselection)
+        self.list_select(deselecting=True)
+        self.restore_new_data()
+
+    def store_new_data(self):
+        try:
+            self.stored_data = {
+                'phone': self.phone_ent.get(),
+                'name': self.name_ent.get(),
+                'details': self.details_ent.get("1.0", END),
+                'done': self.done_var.get(),
+                'done_details': self.done_details_ent.get("1.0", END),
+            }
+        except AttributeError:
+            self.stored_data = {}
+
+    def restore_new_data(self):
+        self.phone_ent.delete(0, END)
+        self.phone_ent.insert(0, self.stored_data.get('phone', ""))
+        self.name_ent.delete(0, END)
+        self.name_ent.insert(0, self.stored_data.get('name', ""))
+        self.details_ent.delete("1.0", END)
+        self.details_ent.insert("1.0", self.stored_data.get('details', ""))
+        self.done_var.set(self.stored_data.get('done', False))
+        self.done_details_ent.delete("1.0", END)
+        self.done_details_ent.insert("1.0", self.stored_data.get('done_details', ""))
+        self.stored_data = {}
 
     def generate_csv(self):
         """ генерация csv """
@@ -509,22 +554,20 @@ class Plugin:
             return
         f = f.replace('\\', '/')
         self.app.app.sets.save_pdf = '/'.join(f.split('/')[:-1])
-        doc = csv.writer(open(f, 'w'), delimiter=';', lineterminator='\n', quoting=csv.QUOTE_ALL)
-        doc.writerow([u'Дата'.encode('cp1251'), u'Время'.encode('cp1251'), u'Телефон'.encode('cp1251'),
-                      u'Имя'.encode('cp1251'), u'Детали'.encode('cp1251'), u'Сделано'.encode('cp1251'),
-                      u'Дата исп.'.encode('cp1251'), u'Время исп'.encode('cp1251'), u'Детали исп.'.encode('cp1251'),
-                      u'ID'.encode('cp1251')])
+        doc = csv.writer(open(f, 'w', encoding='utf8'), delimiter=';', lineterminator='\n', quoting=csv.QUOTE_ALL)
+        doc.writerow(['Дата', 'Время', 'Телефон', 'Имя', 'Детали', 'Сделано',
+                      'Дата исп.', 'Время исп', 'Детали исп.', 'ID'])
 
         self.app.app.db.execute('select ' + self.column_names + ',id from phone')
         result = self.app.app.db.fetchall()
 
         idx_id = self.idx_done + 1
         for rec in result:
-            doc.writerow([rec[self.idx_date], rec[self.idx_time], rec[self.idx_phone].encode('cp1251', 'ignore'),
-                          rec[self.idx_name].encode('cp1251', 'ignore'),
-                          rec[self.idx_details].encode('cp1251', 'ignore'),
+            doc.writerow([rec[self.idx_date], rec[self.idx_time], rec[self.idx_phone],
+                          rec[self.idx_name],
+                          rec[self.idx_details],
                           rec[self.idx_done], rec[self.idx_done_date], rec[self.idx_done_time],
-                          rec[self.idx_done_details].encode('cp1251', 'ignore'), rec[idx_id]])
+                          rec[self.idx_done_details], rec[idx_id]])
 
         self.win.deiconify()
 

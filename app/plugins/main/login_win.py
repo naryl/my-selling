@@ -19,13 +19,15 @@
 
 
 """
-import tkMessageBox as box
-from Tkinter import *
-from ttk import *
+import tkinter.messagebox as box
+from tkinter import *
 
-import md5py
+from app.plugins.ext_lib.cyrillic_keybinds import CyrillicKeybindsMixin
+from app.plugins.ext_lib.ttk import *
 
-import about_win
+import app.plugins.ext_lib.md5py as md5py
+
+import app.plugins.main.about_win as about_win
 
 
 class Main:
@@ -33,6 +35,7 @@ class Main:
         self.app = app
 
         self.win = Frame(self.app.win)
+        CyrillicKeybindsMixin.enable_cyrillic_keybinds(self.win)
         self.win.place(relx=0.5, rely=0.5, anchor=CENTER)
         Label(self.win, image=self.app.img['note']).pack()
         self.frame = LabelFrame(self.win, text='Выбор пользователя', height=400)
@@ -75,7 +78,7 @@ class Main:
             return
         self.passw['state'] = 'normal'
         self.enter['state'] = 'normal'
-        self.enter['text'] = 'Войти (%s)' % name.encode('utf-8')
+        self.enter['text'] = 'Войти (%s)' % name
         self.name = name
         self.passw.focus()
 
